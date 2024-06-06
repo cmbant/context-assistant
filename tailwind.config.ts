@@ -13,18 +13,12 @@ const config: Config = {
         "gradient-conic":
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
       },
-    },
-  },  
-  plugins: [],
-};
-export default config;
-
-module.exports = {
-  theme: {
-    extend: {
       maxWidth: {
         'lg': '850px', // Adjust this value as needed
       },
     },
-  },
-}
+  },  
+  plugins: [],
+};
+
+export default config;
