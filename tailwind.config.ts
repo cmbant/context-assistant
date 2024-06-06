@@ -18,3 +18,13 @@ const config: Config = {
   plugins: [],
 };
 export default config;
+
+module.exports = {
+  theme: {
+    extend: {
+      maxWidth: {
+        'lg': '850px', // Adjust this value as needed
+      },
+    },
+  },
+}

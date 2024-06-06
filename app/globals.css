@@ -58,6 +58,10 @@
   border-radius: 1px;
 }
 
+pre {
+ background-color: #EAEAE0;
+ font-size: smaller;
+}
 
 li{
     padding-left: 16px;
@@ -73,5 +77,5 @@ li ul{
 }
 
 .text-5xl{
-  font-size: 32px;
+  font-size: 24px;
 }
