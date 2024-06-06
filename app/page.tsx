@@ -11,7 +11,7 @@ export default function Home() {
           </div>
         </div>
         <OpenAIAssistant 
-          assistantId="asst_LozNIVQK0nGDswTpgKlict1B"
+          assistantId="asst_IRZpfQJszIoMVYKtJ4F2ntZz"
           greeting="How can I help you?"
         />
       </div>
