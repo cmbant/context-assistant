@@ -51,10 +51,27 @@
 }
 
 .openai-text code {
-  font-size: small;
-  padding: 1rem;
-  overflow-x: auto;
-  display: block;
-  background-color: black;
-  color: white;
+  border: 1px solid var(--gray-100);
+  padding: 2px;
+  font-weight: 800;
+  background-color: #EAEAE0;
+  border-radius: 1px;
+}
+
+
+li{
+    padding-left: 16px;
+    position: relative;
+}
+
+.openai-text li p{
+  margin-bottom: 4px;
+}
+
+li ul{
+  margin-top: 4px;
+}
+
+.text-5xl{
+  font-size: 32px;
 }
