@@ -1,72 +1,134 @@
-# OpenAI Assistant Starter Kit
+# Full-Context Help Assistant
 
-Try the live version of this application by visiting:
+This application provides an interactive help assistant for cosmology tools like CAMB, GetDist, and Cobaya. It features:
 
-[OpenAI Assistant Starter Kit](https://openai-assistant-starter-kit.vercel.app/)
+* Support for multiple tools with a tab interface
+* Full context documentation for accurate answers
+* Multiple AI model options (OpenAI and Gemini)
+* Streaming responses for real-time feedback
 
-![screen capture](screen-capture.png)
+This application was built using NextJS + ReactJS + TypeScript and supports multiple AI providers.
 
+## Configuration Options
 
-The **OpenAI Assistant Starter Kit** is a fully-functional OpenAI chat application that illustrates:
+This application supports multiple AI providers and models:
 
-* Streaming OpenAI Assistant responses from the server to deliver realtime responses.
-* Customizing the appearance and behavior of your OpenAI chat application.
-* Handling a long thread of messages without losing context.
-* Designing an OpenAI app to work on both mobile and desktop.
+### 1. OpenAI Models
 
-This Starter Kit was built using NextJS + ReactJS + TypeScript + OpenAI. 
+The application uses the OpenAI Chat Completions API with full context documentation. By default, it uses the `gpt-4.1-mini-2025-04-14` model, but you can configure other OpenAI models in the UI.
 
-## Configure Your Assistant
+Benefits:
+- Full context documentation for accurate answers
+- Streaming responses for real-time feedback
+- Model selection in the UI
 
-Before you can use this Starter Kit, you must first configure an OpenAI Assistant by visiting the [OpenAI Playground](https://platform.openai.com/playground?mode=assistant). Create a new OpenAI Assistant by entering an Assistant name, instructions, and model.
+### 2. Gemini Models
 
-![screen capture](create-new-assistant.png)
+The application also supports Google's Gemini models, including:
+- `gemini-2.5-pro-exp-03-25` (Gemini Pro)
+- `gemini-2.0-flash` (Gemini Flash)
 
-After you create your new Assistant, make note of the Assistant Id. You'll need this Id to build a UI for your Assistant using the Starter Kit. 
+You can switch between models in the UI based on your needs for speed vs. accuracy.
 
-## Downloading and Running the Code Locally
+### Configuration File
 
-Complete these three steps to download and run the **OpenAI Assistant Starter Kit** locally.
+The application is configured via the `config.json` file at the root of the project:
 
-First, create a new NextJS app that uses the **OpenAI Assistant Starter Kit** as a template:
-
-```bash
-npx create-next-app@latest openai-assistant-starter-kit --use-npm --example "https://github.com/Superexpert/openai-assistant-starter-kit"
+```json
+{
+  "defaultProgram": "camb",
+  "showContextLink": true,
+  "programs": [
+    {
+      "id": "camb",
+      "name": "CAMB",
+      "description": "Code for Anisotropies in the Microwave Background",
+      "contextFiles": ["camb-docs.md", "CAMBdemo.md"],
+      "combinedContextFile": "camb-combined.md",
+      "docsUrl": "https://camb.readthedocs.io/"
+    },
+    {
+      "id": "getdist",
+      "name": "GetDist",
+      "description": "Plotting and analysis of MCMC samples",
+      "contextFiles": ["getdist-readthedocs.md", "plot_gallery.md"],
+      "combinedContextFile": "getdist-combined.md",
+      "docsUrl": "https://getdist.readthedocs.io/"
+    }
+  ]
+}
 ```
 
-In your new folder, run the following command to get all of your npm packages:
+## Running the Application
 
-```
-npm install
-```
+1. Ensure you have Node.js installed
+2. Clone this repository
+3. Install dependencies:
+   ```
+   npm install
+   ```
+4. Configure your API keys as environment variables:
+   ```
+   # For OpenAI
+   export OPENAI_API_KEY='your-openai-api-key-here'
 
-Second, ensure that you have configured an OpenAI API Key on your computer. You can run the following command from Terminal in MacOS:
+   # For Gemini
+   export GEMINI_API_KEY='your-gemini-api-key-here'
+   ```
+5. Build the context files:
+   ```
+   node scripts/build-context.js && node scripts/generate-context-module.js
+   ```
+6. Run the development server:
+   ```
+   npm run dev
+   ```
+7. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-```bash
-nano ~/.zshrc
-```
-Add your OpenAI API Key:
-```
-export OPENAI_API_KEY='your-api-key-here'
-```
-And then hit Ctrl+O to write the changes, followed by Ctrl+X to close the editor. Restart Terminal so it can pick up on the new environment variable.
+## Customizing the Application
 
-Next, you need to add your Assistant Id to the Starter Kit. Open the app/page.tsx file and modify the assistantId prop associated with the OpenAIAssistant ReactJS component:
+### Adding New Tools
 
-```
-<OpenAIAssistant 
-    assistantId="asst_gx3Htc0gLVNlpBQKLoefkXZZ"
-    greeting="I am a helpful chat assistant. How can I help you?"
-/>
-```
+To add support for additional tools:
 
-Finally, run the app by entering the following command in Terminal:
+1. Update the configuration in `config.json`:
+   ```json
+   {
+     "id": "your-tool-id",
+     "name": "Your Tool Name",
+     "description": "Description of your tool",
+     "contextFiles": ["your-tool-docs.md"],
+     "combinedContextFile": "your-tool-combined.md",
+     "docsUrl": "https://your-tool-documentation-url/"
+   }
+   ```
 
-```
-npm run dev
-```
+2. Add documentation for your tool in the `context` directory (e.g., `context/your-tool-docs.md`)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3. Run the build scripts to generate the combined context files:
+   ```
+   node scripts/build-context.js && node scripts/generate-context-module.js
+   ```
+
+### Modifying the UI
+
+The UI components are located in the `app/ui` directory. Key components:
+
+- `chat-container.tsx`: Main container that handles program selection and model selection
+- `program-tabs.tsx`: Tab interface for switching between different tools
+- `chat.tsx`: Implementation of the chat interface
+- `model-selector.tsx`: UI for selecting different AI models
+
+### Deployment
+
+This application can be deployed to Vercel with minimal configuration:
+
+1. Connect your GitHub repository to Vercel
+2. Configure the environment variables for your API keys
+3. Deploy the application
+
+The build process will automatically generate the combined context files during deployment.
 
 ## Learn More
-To learn more about building OpenAI applications, consider hiring [Superexpert Training](https://superexpert.com) to provide an OpenAI workshop for your company.
+
+This application provides a full-context approach to AI assistance, sending the entire documentation as context to the AI model rather than using RAG (Retrieval Augmented Generation). This approach ensures more accurate and consistent responses, especially for specialized technical domains.

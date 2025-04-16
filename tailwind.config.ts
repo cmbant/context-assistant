@@ -15,10 +15,11 @@ const config: Config = {
       },
       maxWidth: {
         'lg': '95%', // Adjust this value as needed
+        '2xl': '800px', // Custom max width for our chat container
       },
     },
-  },  
-  plugins: [],
+  },
+  plugins: [require('@tailwindcss/typography')],
 };
 
 export default config;

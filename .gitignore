@@ -28,6 +28,20 @@ yarn-error.log*
 # local env files
 .env*.local
 
+# test files
+test-*.bat
+test-*.sh
+start-*.bat
+start-*.sh
+set-api-key.js
+test-gemini-api.js
+
+# context files in public directory (generated during build)
+/public/context/
+
+# embedded context file (generated during build)
+/app/utils/embedded-context.ts
+
 # vercel
 .vercel
 

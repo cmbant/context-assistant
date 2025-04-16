@@ -1,30 +1,41 @@
 {
-  "name": "openai-assistant-starter-kit",
+  "name": "help-assistant",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "node scripts/build-context.js && node scripts/generate-context-module.js && next dev",
+    "build": "node scripts/build-context.js && node scripts/generate-context-module.js && next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test-dev": "node scripts/build-context.js && node scripts/generate-context-module.js && cross-env OPENAI_MODEL=gpt-4.1-mini-2025-04-14 next dev",
+    "test-start": "cross-env OPENAI_MODEL=gpt-4.1-mini-2025-04-14 next start",
+    "start-with-key": "node start-with-key.js",
+    "build-context": "node scripts/build-context.js && node scripts/generate-context-module.js"
   },
   "dependencies": {
-    "next": "14.1.3",
-    "openai": "^4.29.2",
-    "react": "^18",
-    "react-dom": "^18",
-    "react-icons": "^5.0.1",
-    "react-markdown": "^9.0.1"
+    "@google/genai": "^0.8.0",
+    "highlight.js": "^11.11.1",
+    "next": "15.3.0",
+    "openai": "4.94.0",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-icons": "5.5.0",
+    "react-markdown": "^10.1.0",
+    "rehype-highlight": "^7.0.2",
+    "rehype-raw": "^7.0.0",
+    "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
-    "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "autoprefixer": "^10.0.1",
-    "eslint": "^8",
-    "eslint-config-next": "14.1.3",
-    "postcss": "^8",
-    "tailwindcss": "^3.3.0",
-    "typescript": "^5"
+    "@tailwindcss/typography": "^0.5.16",
+    "@types/node": "20",
+    "@types/react": "19",
+    "@types/react-dom": "19",
+    "autoprefixer": "10.4.21",
+    "cross-env": "^7.0.3",
+    "eslint": "9.24.0",
+    "eslint-config-next": "15.3.0",
+    "postcss": "8.4.31",
+    "tailwindcss": "3.3.5",
+    "typescript": "5.8.3"
   }
 }

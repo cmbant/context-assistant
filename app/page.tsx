@@ -1,18 +1,17 @@
-import OpenAIAssistant from "@/app/ui/openai-assistant";
+import ChatContainer from "@/app/ui/chat-container";
+import { loadConfig, getDefaultProgram } from "@/app/utils/config";
 
+export default async function Home() {
+  // Load configuration
+  const config = loadConfig();
+  const defaultProgram = getDefaultProgram();
 
-export default function Home() {
   return (
     <main>
-      <div className="mx-auto mb-12 max-w-lg text-center">
-        <div className="m-4">
-          <h1 className="mb-4 text-5xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-5xl">Cobaya, CAMB, GetDist Help</h1>
-          <div className="mb-6 text-normal font-normal text-gray-500">
-          </div>
-        </div>
-        <OpenAIAssistant 
-          assistantId="asst_IRZpfQJszIoMVYKtJ4F2ntZz"
-          greeting="How can I help you?"
+      <div className="mx-auto my-4 sm:my-8 px-2 sm:px-4 w-full max-w-2xl lg:max-w-4xl xl:max-w-6xl">
+        <ChatContainer
+          programs={config.programs}
+          defaultProgramId={defaultProgram.id}
         />
       </div>
     </main>
