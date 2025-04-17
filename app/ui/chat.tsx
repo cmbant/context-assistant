@@ -3,8 +3,14 @@
 import { useState, useRef, useEffect } from "react";
 import { AiOutlineUser, AiOutlineRobot, AiOutlineSend } from "react-icons/ai";
 import Markdown from 'react-markdown';
+import rehypeHighlight from 'rehype-highlight';
+import rehypeRaw from 'rehype-raw';
+import rehypeKatex from 'rehype-katex';
+import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
 import { Message } from '@/app/utils/types';
-import 'highlight.js/styles/github.css';
+// We'll handle syntax highlighting styles in globals.css
+import CopyButton from './copy-button';
 
 interface ChatProps {
   programId: string;
@@ -162,7 +168,7 @@ export default function Chat({
   }
 
   return (
-    <div className="flex flex-col bg-white">
+    <div className="flex flex-col bg-white dark:bg-gray-800">
       <div className="p-2">
         <ChatMessage
           message={greetingMessageRef.current}
@@ -184,11 +190,11 @@ export default function Chat({
           />
         )}
       </div>
-      <form onSubmit={handleSubmit} className="p-2 border-t border-gray-300 flex">
+      <form onSubmit={handleSubmit} className="p-2 border-t border-gray-300 dark:border-gray-700 flex">
         <input
           disabled={isLoading}
           autoFocus
-          className="border border-gray-300 rounded w-full py-2 px-3 text-gray-700"
+          className="border border-gray-300 dark:border-gray-700 rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800"
           onChange={handlePromptChange}
           value={prompt}
           placeholder={isLoading ? "Thinking..." : "Ask a question..."} />
@@ -214,9 +220,9 @@ function ChatMessage({ message }: { message: Message }) {
   function displayRole(roleName: string) {
     switch (roleName) {
       case "user":
-        return <AiOutlineUser className="text-gray-600" />;
+        return <AiOutlineUser className="text-gray-600 dark:text-gray-300" />;
       case "assistant":
-        return <AiOutlineRobot className="text-gray-600" />;
+        return <AiOutlineRobot className="text-gray-600 dark:text-gray-300" />;
       default:
         return null;
     }
@@ -225,14 +231,63 @@ function ChatMessage({ message }: { message: Message }) {
   const isUser = message.role === "user";
 
   return (
-    <div className={`flex rounded-lg text-gray-700 px-4 py-3 my-2 shadow-sm border ${isUser ? 'bg-blue-50 border-blue-100' : 'bg-white border-gray-200'}`}>
+    <div className={`flex rounded-lg text-gray-700 dark:text-gray-200 px-4 py-3 my-2 shadow-sm border ${isUser ? 'bg-blue-50 border-blue-100 dark:bg-blue-900 dark:border-blue-800' : 'bg-white border-gray-200 dark:bg-gray-800 dark:border-gray-700'}`}>
       <div className="text-3xl flex-shrink-0 flex items-start pt-1">
         {displayRole(message.role)}
       </div>
-      <div className="mx-3 text-left overflow-auto w-full prose max-w-none">
+      <div className="mx-3 text-left overflow-auto w-full prose dark:prose-invert max-w-none">
         <Markdown
-          remarkPlugins={[require('remark-gfm')]}
-          rehypePlugins={[require('rehype-raw'), require('rehype-highlight')]}
+          remarkPlugins={[remarkGfm, remarkMath]}
+          rehypePlugins={[rehypeRaw, rehypeHighlight, rehypeKatex]}
+          components={{
+            code(props) {
+              const { node, inline, className, children } = props as {
+                node?: any;
+                inline?: boolean;
+                className?: string;
+                children: React.ReactNode;
+              };
+              // We don't need to use match, so we can remove it
+              // const match = /language-(\w+)/.exec(className || '');
+
+              // Extract text for copy button
+              const extractText = (node: any): string => {
+                if (typeof node === 'string') return node;
+                if (Array.isArray(node)) return node.map(extractText).join('');
+                if (node && typeof node === 'object' && 'props' in node) {
+                  return extractText(node.props?.children || '');
+                }
+                return '';
+              };
+
+              // For inline code, keep it simple
+              if (inline) {
+                return <code className={`${className} inline-code`} {...props}>{children}</code>;
+              }
+
+              // For code blocks, check if it's inside a pre tag
+              // This is the most reliable way to identify actual code blocks vs standalone code tags
+              const isInPreTag = node &&
+                'parentNode' in node &&
+                node.parentNode &&
+                'tagName' in node.parentNode &&
+                node.parentNode.tagName &&
+                node.parentNode.tagName.toLowerCase() === 'pre';
+
+              if (isInPreTag) {
+                // For actual code blocks (inside pre tags), add copy button
+                return (
+                  <>
+                    <code className={className} {...props}>{children}</code>
+                    <CopyButton text={extractText(children)} />
+                  </>
+                );
+              } else {
+                // For standalone code tags that aren't inline (rare case), just render the code
+                return <code className={className} {...props}>{children}</code>;
+              }
+            }
+          }}
         >
           {message.content}
         </Markdown>

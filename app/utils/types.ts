@@ -17,7 +17,7 @@ export interface Program {
   contextFile?: string; // For backward compatibility
   combinedContextFile?: string; // Name of the combined context file for download
   docsUrl: string;
-  assistantId?: string; // Only used for assistant API type
+  extraSystemPrompt?: string; // Additional program-specific system prompt instructions
 }
 
 export interface Config {
@@ -30,6 +30,7 @@ export interface Config {
   };
   availableModels: ModelConfig[]; // List of available models
   defaultModelId: string; // Default model ID to use
+  systemPrompt?: string; // Common system prompt template with placeholders
 }
 
 export interface Message {

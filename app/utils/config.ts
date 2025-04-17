@@ -78,21 +78,4 @@ export function parseModelId(modelId: string): { provider: string; modelName: st
   };
 }
 
-/**
- * Get the API type for a model ID
- * @param modelId The model ID to get the API type for
- * @returns The API type ('chat', 'gemini', or 'assistant')
- */
-export function getApiTypeForModel(modelId: string): 'chat' | 'gemini' | 'assistant' {
-  const { provider } = parseModelId(modelId);
-  switch (provider.toLowerCase()) {
-    case 'gemini':
-      return 'gemini';
-    case 'openai':
-      return 'chat';
-    case 'assistant':
-      return 'assistant';
-    default:
-      return 'chat'; // Default to chat API
-  }
-}
+

@@ -14,7 +14,9 @@ export default function ModelSelector({ models, selectedModelId, onModelChange }
   const [selected, setSelected] = useState<ModelConfig | undefined>(
     models.find(model => model.id === selectedModelId) || models[0]
   );
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 });
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   // Update the selected model when the selectedModelId prop changes
   useEffect(() => {
@@ -46,7 +48,18 @@ export default function ModelSelector({ models, selectedModelId, onModelChange }
     return null;
   }
 
-  const toggleDropdown = () => setIsOpen(!isOpen);
+  const toggleDropdown = () => {
+    if (!isOpen && buttonRef.current) {
+      // Calculate position when opening the dropdown
+      const rect = buttonRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY,
+        right: window.innerWidth - rect.right
+      });
+    }
+    setIsOpen(!isOpen);
+  };
+
   const closeDropdown = () => setIsOpen(false);
 
   const handleModelSelect = (model: ModelConfig) => {
@@ -56,11 +69,12 @@ export default function ModelSelector({ models, selectedModelId, onModelChange }
   };
 
   return (
-    <div className="relative inline-block text-left" ref={dropdownRef}>
+    <div className="relative inline-block text-left w-full" ref={dropdownRef}>
       <div>
         <button
+          ref={buttonRef}
           type="button"
-          className="inline-flex justify-between items-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          className="inline-flex justify-between items-center w-full rounded-md border border-gray-300 dark:border-gray-700 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
           id="model-selector"
           aria-haspopup="true"
           aria-expanded={isOpen}
@@ -87,26 +101,33 @@ export default function ModelSelector({ models, selectedModelId, onModelChange }
 
       {isOpen && (
         <div
-          className="origin-top-right fixed right-4 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50"
+          className="origin-top-right rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 dark:ring-gray-700 z-[100]"
           role="menu"
           aria-orientation="vertical"
           aria-labelledby="model-selector"
-          style={{ maxHeight: '80vh', overflowY: 'auto' }}
+          style={{
+            maxHeight: '80vh',
+            overflowY: 'auto',
+            position: 'fixed',
+            top: `${dropdownPosition.top}px`,
+            right: `${dropdownPosition.right}px`,
+            width: buttonRef.current ? `${buttonRef.current.offsetWidth}px` : '14rem'
+          }}
         >
           <div className="py-1" role="none">
             {models.map((model) => (
               <button
                 key={model.id}
                 className={`${
-                  selected?.id === model.id ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
-                } block w-full text-left px-4 py-2 text-sm hover:bg-gray-100`}
+                  selected?.id === model.id ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'
+                } block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700`}
                 role="menuitem"
                 onClick={() => handleModelSelect(model)}
               >
                 <div className="flex flex-col">
                   <span className="font-medium">{model.name}</span>
                   {model.description && (
-                    <span className="text-xs text-gray-500">{model.description}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">{model.description}</span>
                   )}
                 </div>
               </button>

@@ -1,4 +1,5 @@
 {
+  "systemPrompt": "You provide expert help on using the {PROGRAM_NAME} Python package.\nWhen showing code examples, use Python 3.11+ syntax, follow best practices and use line length of 79 characters.\n\nOnly answer questions related to {PROGRAM_ID} based on the provided documentation.\nIf you don't know the answer or if it's not covered in the documentation, say so, but you can use general knowledge and cosmology expertise to help with less specific queries.\n\nWhen explaining mathematical concepts or equations, use LaTeX syntax (e.g., $\\alpha^2$ for inline math or $$E = mc^2$$ for display math). Properly format all mathematical expressions, variables, and equations using LaTeX notation.",
   "programs": [
     {
       "id": "camb",
@@ -6,7 +7,8 @@
       "description": "Code for Anisotropies in the Microwave Background",
       "contextFiles": ["camb-docs.md", "CAMBdemo.md"],
       "combinedContextFile": "camb-combined.md",
-      "docsUrl": "https://camb.readthedocs.io/"
+      "docsUrl": "https://camb.readthedocs.io/",
+      "extraSystemPrompt" : "When you need default camb params for example code, you can use \"pars = camb.read_ini('https://tinyurl.com/planck2018')\"."
     },
     {
       "id": "getdist",
@@ -14,7 +16,8 @@
       "description": "Python package for analysing Monte Carlo samples",
       "contextFiles": ["getdist-readthedocs.md", "plot_gallery.md"],
       "combinedContextFile": "getdist-combined.md",
-      "docsUrl": "https://getdist.readthedocs.io/"
+      "docsUrl": "https://getdist.readthedocs.io/",
+      "extraSystemPrompt": "getdist should use ignore_rows to remove burn in when samples come from MCMC chains without burn in already removed."
     },
     {
       "id": "cobaya",
@@ -35,7 +38,8 @@
       "description": "Fast and efficient model for most queries",
       "options": {
         "temperature": 0.7,
-        "max_completion_tokens": 2048
+        "max_completion_tokens": 2048,
+        "stream": true
       }
     },
     {
@@ -44,7 +48,8 @@
       "description": "More powerful model for complex queries",
       "options": {
         "temperature": 0.7,
-        "max_completion_tokens": 4096
+        "max_completion_tokens": 4096,
+        "stream": true
       }
     },
     {
@@ -53,7 +58,8 @@
       "description": "OpenAI GPT-4.1 Mini model",
       "options": {
         "temperature": 0.7,
-        "max_completion_tokens": 4096
+        "max_completion_tokens": 4096,
+        "stream": true
       }
     },
     {
@@ -62,7 +68,18 @@
       "description": "OpenAI thinking model",
       "options": {
         "temperature": 1,
-        "max_completion_tokens": 4096
+        "max_completion_tokens": 4096,
+        "stream": true
+      }
+    },
+    {
+      "id": "deepseek/deepseek-chat-v3-0324",
+      "name": "Deepseek Chat V3",
+      "description": "Deepseek's powerful chat model via OpenRouter",
+      "options": {
+        "temperature": 0.7,
+        "max_completion_tokens": 4096,
+        "stream": true
       }
     }
   ]

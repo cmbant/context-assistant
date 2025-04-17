@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react';
 import ProgramTabs from './program-tabs';
 import Chat from './chat';
 import ChatSimple from './chat-simple';
-import OpenAIAssistant from './openai-assistant';
 import ModelSelector from './model-selector';
+import ThemeToggle from './theme-toggle';
 import { Program, ChatState, ModelConfig } from '@/app/utils/types';
-import { loadConfig, getApiTypeForModel } from '@/app/utils/config';
+import { loadConfig } from '@/app/utils/config';
 
 interface ChatContainerProps {
   programs: Program[];
@@ -65,11 +65,10 @@ export default function ChatContainer({
   const currentProgram = getActiveProgram();
   const showTabs = programs.length > 1;
   const showContextLink = config.showContextLink !== false; // Default to true if not specified
-  const apiType = getApiTypeForModel(selectedModelId);
 
   return (
-    <div className="flex flex-col w-full mx-auto border border-gray-300 shadow-lg rounded-md overflow-hidden text-sm sm:text-base">
-      <div className="flex flex-col bg-white">
+    <div className="flex flex-col w-full mx-auto border border-gray-300 dark:border-gray-700 shadow-lg rounded-md overflow-hidden text-sm sm:text-base bg-white dark:bg-gray-900">
+      <div className="flex flex-col bg-white dark:bg-gray-900">
         <div className="flex justify-between items-center">
           <div className="flex-grow">
             {showTabs && (
@@ -81,7 +80,7 @@ export default function ChatContainer({
             )}
           </div>
           {config.availableModels.length > 1 && (
-            <div className="p-2">
+            <div className="p-2 relative w-56">
               <ModelSelector
                 models={config.availableModels}
                 selectedModelId={selectedModelId}
@@ -91,12 +90,12 @@ export default function ChatContainer({
           )}
         </div>
 
-        <div className="px-4 py-3 text-sm text-gray-700 border-b border-gray-300 bg-white">
+        <div className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300 border-b border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900">
           <div className="flex justify-between items-center">
             <div>
               {currentProgram.description}
             </div>
-            <div className="flex space-x-4">
+            <div className="flex space-x-4 items-center">
               {showContextLink && (
                 <a
                   href={`/api/context/${currentProgram.id}`}
@@ -119,25 +118,18 @@ export default function ChatContainer({
                 <span className="hidden sm:inline">Docs</span>
                 <span className="sm:hidden">📖</span>
               </a>
+              <ThemeToggle />
             </div>
           </div>
         </div>
       </div>
 
-      {currentProgram.assistantId ? (
-        <OpenAIAssistant
-          assistantId={currentProgram.assistantId}
-          greeting={`How can I help you?`}
-        />
-      ) : (
-        <ChatSimple
-          /* Remove key to prevent re-render when program changes */
-          programId={activeProgram}
-          greeting={`How can I help you?`}
-          apiType={apiType}
-          selectedModelId={selectedModelId}
-        />
-      )}
+      <ChatSimple
+        /* Remove key to prevent re-render when program changes */
+        programId={activeProgram}
+        greeting={`How can I help you?`}
+        selectedModelId={selectedModelId}
+      />
     </div>
   );
 }

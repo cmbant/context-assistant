@@ -9,12 +9,12 @@
     "lint": "next lint",
     "test-dev": "node scripts/build-context.js && node scripts/generate-context-module.js && cross-env OPENAI_MODEL=gpt-4.1-mini-2025-04-14 next dev",
     "test-start": "cross-env OPENAI_MODEL=gpt-4.1-mini-2025-04-14 next start",
-    "start-with-key": "node start-with-key.js",
+    "set-api-key": "node set-api-key.js",
     "build-context": "node scripts/build-context.js && node scripts/generate-context-module.js"
   },
   "dependencies": {
-    "@google/genai": "^0.8.0",
     "highlight.js": "^11.11.1",
+    "katex": "^0.16.9",
     "next": "15.3.0",
     "openai": "4.94.0",
     "react": "19.1.0",
@@ -22,8 +22,10 @@
     "react-icons": "5.5.0",
     "react-markdown": "^10.1.0",
     "rehype-highlight": "^7.0.2",
+    "rehype-katex": "^7.0.0",
     "rehype-raw": "^7.0.0",
-    "remark-gfm": "^4.0.1"
+    "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0"
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.16",

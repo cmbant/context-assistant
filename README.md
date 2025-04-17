@@ -1,63 +1,45 @@
 # Full-Context Help Assistant
 
-This application provides an interactive help assistant for cosmology tools like CAMB, GetDist, and Cobaya. It features:
+This application provides an interactive help assistant for technical documentation. It's designed to provide accurate answers by sending the full documentation context to the AI model. The example implementation focuses on cosmology tools (CAMB, GetDist, and Cobaya), but the framework can be adapted for any technical documentation.
 
-* Support for multiple tools with a tab interface
-* Full context documentation for accurate answers
-* Multiple AI model options (OpenAI and Gemini)
+Key features:
+
+* Support for multiple tools/documentation sets with a tab interface
+* Full context documentation for accurate answers without RAG
+* Multiple AI model options (OpenAI, Gemini, OpenRouter, etc.)
 * Streaming responses for real-time feedback
+* Cancellable requests
 
-This application was built using NextJS + ReactJS + TypeScript and supports multiple AI providers.
+This application was built using NextJS + ReactJS + TypeScript and supports multiple AI providers through a unified API interface.
 
 ## Configuration Options
 
-This application supports multiple AI providers and models:
+This application supports multiple AI providers and models through a unified API interface:
 
-### 1. OpenAI Models
+### Supported AI Providers
 
-The application uses the OpenAI Chat Completions API with full context documentation. By default, it uses the `gpt-4.1-mini-2025-04-14` model, but you can configure other OpenAI models in the UI.
+1. **OpenAI Models**
+   - Uses the OpenAI Chat Completions API with full context documentation
+   - Models: `gpt-4.1-mini-2025-04-14`, `o4-mini`, etc.
 
-Benefits:
-- Full context documentation for accurate answers
-- Streaming responses for real-time feedback
-- Model selection in the UI
+2. **Gemini Models**
+   - Supports Google's Gemini models through the OpenAI-compatible API
+   - Available models: flash and Pro
 
-### 2. Gemini Models
+3. **OpenRouter**
+   - Provides access to a wide range of models through a unified API
+   - Includes models like DeepSeek, Claude, and others, where context large enough for use case
 
-The application also supports Google's Gemini models, including:
-- `gemini-2.5-pro-exp-03-25` (Gemini Pro)
-- `gemini-2.0-flash` (Gemini Flash)
+### Important Note on Context Length
 
-You can switch between models in the UI based on your needs for speed vs. accuracy.
+When selecting models, ensure they have sufficient context length to handle your entire documentation. The full-context approach requires models that can process large amounts of text (typically 100K+ tokens). Models with insufficient context length will not be able to process the entire documentation, resulting in incomplete or inaccurate responses.
 
-### Configuration File
+Recommended minimum context lengths:
+- For small documentation: 16K tokens
+- For medium documentation: 32K tokens
+- For large documentation: 128K+ tokens
 
-The application is configured via the `config.json` file at the root of the project:
-
-```json
-{
-  "defaultProgram": "camb",
-  "showContextLink": true,
-  "programs": [
-    {
-      "id": "camb",
-      "name": "CAMB",
-      "description": "Code for Anisotropies in the Microwave Background",
-      "contextFiles": ["camb-docs.md", "CAMBdemo.md"],
-      "combinedContextFile": "camb-combined.md",
-      "docsUrl": "https://camb.readthedocs.io/"
-    },
-    {
-      "id": "getdist",
-      "name": "GetDist",
-      "description": "Plotting and analysis of MCMC samples",
-      "contextFiles": ["getdist-readthedocs.md", "plot_gallery.md"],
-      "combinedContextFile": "getdist-combined.md",
-      "docsUrl": "https://getdist.readthedocs.io/"
-    }
-  ]
-}
-```
+You can switch between models in the UI based on your needs for speed, accuracy, and context length capacity.
 
 ## Running the Application
 
@@ -74,7 +56,15 @@ The application is configured via the `config.json` file at the root of the proj
 
    # For Gemini
    export GEMINI_API_KEY='your-gemini-api-key-here'
+
+   # For OpenRouter
+   export OPEN_ROUTER_KEY='your-openrouter-api-key-here'
+
+   # For other providers as needed
+   export SAMBA_NOVA_API_KEY='your-sambanova-api-key-here'
    ```
+
+   Note: Only configure the API keys for the providers you plan to use.
 5. Build the context files:
    ```
    node scripts/build-context.js && node scripts/generate-context-module.js
@@ -85,39 +75,64 @@ The application is configured via the `config.json` file at the root of the proj
    ```
 7. Open [http://localhost:3000](http://localhost:3000) in your browser
 
+This can all be done automatically using e.g. vercel to host, building on a github push trigger.
+
 ## Customizing the Application
 
-### Adding New Tools
+### Adding New Documentation Sets
 
-To add support for additional tools:
+To add support for additional documentation sets:
 
-1. Update the configuration in `config.json`:
+1. Update the configuration in `config.json` by adding a new entry to the `programs` array:
    ```json
    {
-     "id": "your-tool-id",
-     "name": "Your Tool Name",
-     "description": "Description of your tool",
-     "contextFiles": ["your-tool-docs.md"],
-     "combinedContextFile": "your-tool-combined.md",
-     "docsUrl": "https://your-tool-documentation-url/"
+     "id": "your-program-id",
+     "name": "Your Program Name",
+     "description": "Description of your program",
+     "contextFiles": ["your-program-docs.md", "your-program-examples.md"],
+     "combinedContextFile": "your-program-combined.md",
+     "docsUrl": "https://your-program-documentation-url/",
+     "extraSystemPrompt": "Additional instructions for the AI when answering about your program."
    }
    ```
 
-2. Add documentation for your tool in the `context` directory (e.g., `context/your-tool-docs.md`)
+2. Add documentation files for your program in the `context` directory (e.g., `context/your-program-docs.md`)
 
 3. Run the build scripts to generate the combined context files:
    ```
    node scripts/build-context.js && node scripts/generate-context-module.js
    ```
 
+4. Ensure your documentation size is appropriate for the models you plan to use. If your documentation is large, you may need to split it into multiple files or use models with larger context windows.
+
 ### Modifying the UI
 
 The UI components are located in the `app/ui` directory. Key components:
 
 - `chat-container.tsx`: Main container that handles program selection and model selection
-- `program-tabs.tsx`: Tab interface for switching between different tools
-- `chat.tsx`: Implementation of the chat interface
+- `program-tabs.tsx`: Tab interface for switching between different documentation sets
+- `chat-simple.tsx`: Implementation of the chat interface with streaming and cancellation support
 - `model-selector.tsx`: UI for selecting different AI models
+
+### Adding New Models
+
+To add support for additional AI models:
+
+1. Update the configuration in `config.json` by adding a new entry to the `availableModels` array:
+   ```json
+   {
+     "id": "provider/model-name",
+     "name": "Display Name",
+     "description": "Description of the model",
+     "options": {
+       "temperature": 0.7,
+       "max_completion_tokens": 4096,
+       "stream": true
+     }
+   }
+   ```
+
+2. If adding a new provider, update the `PROVIDER_CONFIGS` in `app/utils/unified-client.ts` to include the new provider configuration.
 
 ### Deployment
 
@@ -131,4 +146,27 @@ The build process will automatically generate the combined context files during 
 
 ## Learn More
 
-This application provides a full-context approach to AI assistance, sending the entire documentation as context to the AI model rather than using RAG (Retrieval Augmented Generation). This approach ensures more accurate and consistent responses, especially for specialized technical domains.
+### Full-Context vs. RAG Approach
+
+This application uses a full-context approach to AI assistance, sending the entire documentation as context to the AI model rather than using RAG (Retrieval Augmented Generation). This approach has several advantages:
+
+- **Accuracy**: The AI has access to the complete documentation, ensuring more accurate and consistent responses
+- **Coherence**: Responses maintain coherence across the entire knowledge base
+- **Simplicity**: No need for vector databases, embeddings, or complex retrieval systems
+- **Reliability**: Less prone to retrieval errors or hallucinations when information is missing
+
+This approach is particularly effective for specialized technical domains where precision is critical. However, it requires models with sufficient context length to handle the entire documentation.
+
+### Performance Considerations
+
+- **Context Size**: Monitor the size of your documentation to ensure it fits within the model's context window
+- **Token Usage**: Larger contexts consume more tokens, which may affect costs when using paid API services
+- **Response Time**: Models with larger contexts may have slightly longer response times
+
+### Alternative Approaches
+
+If your documentation is too large for even the largest context windows, consider:
+
+1. **Hybrid Approach**: Use RAG for the initial retrieval, then provide the relevant sections as context
+2. **Documentation Splitting**: Split your documentation into logical sections and provide a navigation interface
+3. **Specialized Models**: Train specialized models for different sections of your documentation

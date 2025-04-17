@@ -82,12 +82,24 @@ export async function generateCombinedContextFiles(): Promise<void> {
  * @returns The system prompt with context
  */
 export function getSystemPromptWithContext(programId: string, context: string): string {
-  return `You are a helpful assistant for ${programId.toUpperCase()}.
-Use the following documentation to answer the user's questions about ${programId.toUpperCase()}.
-Only answer questions related to ${programId.toUpperCase()} based on the provided documentation.
-If you don't know the answer or if it's not covered in the documentation, say so, but you can use general
-knowledge to help with less specific queries. For any code outputs, wrap at 79 characters.
+  // Get the program configuration and global config
+  const program = getProgramById(programId) as Program;
+  const config = require('../../config.json');
 
-DOCUMENTATION:
-${context}`;
+  // Get program name and uppercase ID
+  const programName = program?.name || programId.toUpperCase();
+  const programIdUpper = programId.toUpperCase();
+
+  // Get the system prompt template and replace placeholders
+  let systemPromptTemplate = config.systemPrompt
+    .replace(/\{PROGRAM_ID\}/g, programIdUpper)
+    .replace(/\{PROGRAM_NAME\}/g, programName);
+
+  // Add program-specific extra system prompt if available
+  if (program?.extraSystemPrompt) {
+    systemPromptTemplate += `\n\n${program.extraSystemPrompt}`;
+  }
+
+  // Append the documentation to the system prompt
+  return `${systemPromptTemplate}\n\nDOCUMENTATION:\n${context}`;
 }
