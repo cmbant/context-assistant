@@ -17,16 +17,8 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // In Edge runtime, we can't generate combined context files at startup
-  // The combined files should be pre-built and included in the deployment
-  // This code is kept for local development compatibility
-  try {
-    if (typeof window === 'undefined' && process.env.NODE_ENV === 'development') {
-      console.log('Running in development mode - context files should be pre-built');
-    }
-  } catch (error) {
-    console.error('Error in layout component:', error);
-  }
+  // Context files should be pre-built and included in the deployment
+  // No runtime context generation is needed
 
   return (
     <html lang="en" suppressHydrationWarning>

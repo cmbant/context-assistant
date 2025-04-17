@@ -2,6 +2,9 @@
 
 This application provides an interactive help assistant for technical documentation. It's designed to provide accurate answers by sending the full documentation context to the AI model. The example implementation focuses on cosmology tools (CAMB, GetDist, and Cobaya), but the framework can be adapted for any technical documentation.
 
+![Help Assistant Screenshot](shot.png)
+*Screenshot of the Help Assistant interface showing the CAMB, GetDist, and Cobaya tabs with model selection*
+
 Key features:
 
 * Support for multiple tools/documentation sets with a tab interface

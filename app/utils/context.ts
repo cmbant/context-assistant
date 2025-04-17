@@ -49,11 +49,6 @@ export async function loadContext(contextFiles: string[] | string): Promise<stri
   return contextContent;
 }
 
-// For backward compatibility
-export async function loadSingleContextFile(contextFile: string): Promise<string> {
-  return loadContext(contextFile);
-}
-
 /**
  * Get the embedded context for a program directly
  * This is a convenience function that wraps the imported getEmbeddedContext
@@ -63,16 +58,6 @@ export async function loadSingleContextFile(contextFile: string): Promise<string
 export function getEmbeddedContext(programId: string): string | undefined {
   // Re-export from embedded-context.ts
   return getEmbeddedContextFromModule(programId);
-}
-
-/**
- * This is a stub function that doesn't actually generate files
- * The combined context is now embedded in the code at build time
- */
-export async function generateCombinedContextFiles(): Promise<void> {
-  console.log('Context is now embedded in the code at build time');
-  // This function is kept for API compatibility
-  return Promise.resolve();
 }
 
 /**
