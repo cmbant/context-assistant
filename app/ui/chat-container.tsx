@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import ProgramTabs from './program-tabs';
-import Chat from './chat';
 import ChatSimple from './chat-simple';
 import ModelSelector from './model-selector';
 import ThemeToggle from './theme-toggle';
