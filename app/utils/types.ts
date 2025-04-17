@@ -30,6 +30,8 @@ export interface Config {
   };
   availableModels: ModelConfig[]; // List of available models
   defaultModelId: string; // Default model ID to use
+  useDirectOpenAIKey?: boolean; // Flag to use direct OpenAI key if available
+  useDirectGeminiKey?: boolean; // Flag to use direct Gemini key if available
   systemPrompt?: string; // Common system prompt template with placeholders
 }
 

@@ -27,6 +27,9 @@ export function loadConfig(): Config {
     showContextLink: configJson.showContextLink !== undefined ? configJson.showContextLink : defaultConfig.showContextLink,
     defaultModelId: configJson.defaultModelId || 'gemini/gemini-2.0-flash',
     availableModels: configJson.availableModels || [],
+    // Load the new flags, defaulting to true if not present in config.json
+    useDirectOpenAIKey: configJson.useDirectOpenAIKey ?? true,
+    useDirectGeminiKey: configJson.useDirectGeminiKey ?? true,
     apiKeys: defaultConfig.apiKeys || {}
   } as Config;
 }

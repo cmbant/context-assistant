@@ -23,7 +23,7 @@
       "id": "cobaya",
       "name": "Cobaya",
       "description": "Monte Carlo parameter estimation",
-      "contextFiles": ["cobaya_docs_combined.md"],
+      "contextFiles": ["cobaya_docs_combined.md"], 
       "combinedContextFile": "cobaya_docs_combined.md",
       "docsUrl": "https://cobaya.readthedocs.io/"
     }
@@ -31,6 +31,8 @@
   "defaultProgram": "camb",
   "showContextLink": true,
   "defaultModelId": "gemini/gemini-2.0-flash",
+  "useDirectOpenAIKey": true,
+  "useDirectGeminiKey": true,
   "availableModels": [
     {
       "id": "gemini/gemini-2.0-flash",

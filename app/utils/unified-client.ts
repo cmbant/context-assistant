@@ -51,24 +51,45 @@ export function createClient(modelId?: string) {
   // Parse the model ID to get the provider and model name
   const { provider, modelName } = parseModelId(modelIdToUse);
 
-  // Get the provider configuration
-  let providerConfig = PROVIDER_CONFIGS[provider];
-  let actualProvider = provider;
-  let actualModelName = modelName;
+  // Determine the target provider configuration based on flags and availability
+  let targetProviderKey: keyof typeof PROVIDER_CONFIGS = 'openrouter'; // Default to OpenRouter
 
-  // If the provider is not supported, fall back to OpenRouter
-  if (!providerConfig) {
-    console.warn(`Provider ${provider} not directly supported. Falling back to OpenRouter.`);
-    providerConfig = PROVIDER_CONFIGS['openrouter'];
-    actualProvider = 'openrouter';
-    // Keep the original model name for OpenRouter
-    actualModelName = `${provider}/${modelName}`;
+  if (provider === 'openai' && config.useDirectOpenAIKey) {
+    targetProviderKey = 'openai';
+  } else if (provider === 'gemini' && config.useDirectGeminiKey) {
+    targetProviderKey = 'gemini';
+  } else if (provider === 'sambanova') {
+    targetProviderKey = 'sambanova';
+  } else if (PROVIDER_CONFIGS[provider]) {
+    // Handle cases where a known provider (like 'openrouter') is explicitly requested
+    // or when direct keys for openai/gemini are disabled/missing.
+    targetProviderKey = provider as keyof typeof PROVIDER_CONFIGS;
+    // If the provider isn't in PROVIDER_CONFIGS, targetProviderKey remains 'openrouter'
+    if (!PROVIDER_CONFIGS[targetProviderKey]) {
+        targetProviderKey = 'openrouter';
+    }
+  }
+  // For unknown providers, targetProviderKey remains 'openrouter'
+
+  const providerConfig = PROVIDER_CONFIGS[targetProviderKey];
+  const apiKeyEnvVar = providerConfig.apiKeyEnvVar;
+  const apiKey = process.env[apiKeyEnvVar];
+
+  // Determine actual provider and model name for the API call
+  const actualProvider = targetProviderKey;
+  // Use the original modelId for OpenRouter, otherwise just the modelName
+  const actualModelName = (targetProviderKey === 'openrouter') ? modelIdToUse : modelName;
+
+  // Log the decision
+  if (targetProviderKey !== 'openrouter' && (provider === targetProviderKey)) {
+      console.log(`Attempting to use direct ${targetProviderKey} key for model: ${actualModelName}`);
+  } else {
+      console.log(`Using OpenRouter for model: ${actualModelName}`);
   }
 
-  // Get the API key from the environment
-  const apiKey = process.env[providerConfig.apiKeyEnvVar];
+  // Check API key
   if (!apiKey) {
-    throw new Error(`API key not configured for provider ${actualProvider}. Please set the ${providerConfig.apiKeyEnvVar} environment variable.`);
+    throw new Error(`API key not configured for the selected provider (${actualProvider}). Please set the ${apiKeyEnvVar} environment variable.`);
   }
 
   // Create the OpenAI client with the provider-specific configuration
