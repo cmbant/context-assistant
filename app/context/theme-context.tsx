@@ -1,7 +1,6 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
 
 type Theme = 'light' | 'dark'
 
@@ -18,7 +17,6 @@ const ThemeContext = createContext<ThemeContextType>({
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>('light')
   const [mounted, setMounted] = useState(false)
-  const searchParams = useSearchParams()
 
   // Once mounted on client, now we can show the UI
   useEffect(() => {
@@ -38,24 +36,28 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
-    // Check for URL parameter first (highest priority)
-    let urlTheme: Theme | null = null
-    if (searchParams) {
-      const themeParam = searchParams.get('theme')
-      if (themeParam === 'dark' || themeParam === 'light') {
-        urlTheme = themeParam as Theme
+    // Function to get URL parameters without using useSearchParams
+    const getUrlParam = (name: string): string | null => {
+      if (typeof window !== 'undefined') {
+        const urlParams = new URLSearchParams(window.location.search)
+        return urlParams.get(name)
       }
+      return null
     }
+
+    // Check for URL parameter first (highest priority)
+    const urlTheme = getUrlParam('theme') as Theme | null
+    const isValidTheme = urlTheme === 'dark' || urlTheme === 'light'
 
     // Check for user preference in localStorage
     const savedTheme = localStorage.getItem('theme') as Theme | null
 
     // Determine which theme to use (URL param > localStorage > system preference)
-    if (urlTheme) {
+    if (isValidTheme) {
       // URL parameter takes precedence
-      applyTheme(urlTheme)
+      applyTheme(urlTheme as Theme)
       // Save to localStorage to persist the choice
-      localStorage.setItem('theme', urlTheme)
+      localStorage.setItem('theme', urlTheme as Theme)
     } else if (savedTheme) {
       // If no URL param but we have localStorage setting
       applyTheme(savedTheme)
@@ -65,7 +67,19 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       const themeToUse = systemPrefersDark ? 'dark' : 'light'
       applyTheme(themeToUse)
     }
-  }, [searchParams])
+
+    // Add an event listener to handle URL changes
+    const handleUrlChange = () => {
+      const newUrlTheme = getUrlParam('theme')
+      if (newUrlTheme === 'dark' || newUrlTheme === 'light') {
+        applyTheme(newUrlTheme as Theme)
+        localStorage.setItem('theme', newUrlTheme as Theme)
+      }
+    }
+
+    window.addEventListener('popstate', handleUrlChange)
+    return () => window.removeEventListener('popstate', handleUrlChange)
+  }, [])
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light'
