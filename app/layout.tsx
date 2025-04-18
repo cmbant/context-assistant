@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   description: "Interactive help assistant for CAMB, GetDist, and other cosmology tools",
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
