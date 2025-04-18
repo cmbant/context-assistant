@@ -1,4 +1,4 @@
-import { Config, Program, ModelConfig } from './types';
+import { Config, Program } from './types';
 
 // Import the config directly
 import configJson from '../../config.json';

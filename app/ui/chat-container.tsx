@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import ProgramTabs from './program-tabs';
 import ChatSimple from './chat-simple';
 import ModelSelector from './model-selector';
 import ThemeToggle from './theme-toggle';
-import { Program, ChatState, ModelConfig } from '@/app/utils/types';
+import { Program } from '@/app/utils/types';
 import { loadConfig } from '@/app/utils/config';
 
 interface ChatContainerProps {
@@ -19,20 +19,10 @@ export default function ChatContainer({
 }: ChatContainerProps) {
   const config = loadConfig();
   const [activeProgram, setActiveProgram] = useState(defaultProgramId);
-  const [chatStates, setChatStates] = useState<Record<string, ChatState>>({});
+  // Chat state is managed internally by ChatSimple component
   const [selectedModelId, setSelectedModelId] = useState<string>(config.defaultModelId);
 
-  // Initialize chat states for all programs
-  useEffect(() => {
-    const initialChatStates: Record<string, ChatState> = {};
-    programs.forEach(program => {
-      initialChatStates[program.id] = {
-        messages: [],
-        selectedModelId: selectedModelId
-      };
-    });
-    setChatStates(initialChatStates);
-  }, [programs, selectedModelId]);
+  // No need to initialize chat states as they're managed internally by ChatSimple
 
   // Handle program change
   const handleProgramChange = (programId: string) => {
@@ -42,18 +32,7 @@ export default function ChatContainer({
   // Handle model change
   const handleModelChange = (modelId: string) => {
     setSelectedModelId(modelId);
-
-    // Update the selected model for all chat states
-    setChatStates(prevStates => {
-      const newStates = { ...prevStates };
-      Object.keys(newStates).forEach(programId => {
-        newStates[programId] = {
-          ...newStates[programId],
-          selectedModelId: modelId
-        };
-      });
-      return newStates;
-    });
+    // The selected model is passed to ChatSimple component
   };
 
   // Get the active program
