@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   description: "Interactive help assistant for CAMB, GetDist, and other cosmology tools",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -41,14 +41,9 @@ export default function RootLayout({
                     return null;
                   }
 
-                  // Check for URL parameters first (highest priority)
+                  // Check for URL parameter first (highest priority)
                   const urlTheme = getUrlParam('theme');
                   const isValidTheme = urlTheme === 'dark' || urlTheme === 'light';
-
-                  // Check for scale parameter
-                  const urlScale = getUrlParam('scale');
-                  const scaleValue = urlScale ? parseFloat(urlScale) : null;
-                  const isValidScale = scaleValue !== null && !isNaN(scaleValue) && scaleValue > 0 && scaleValue <= 2;
 
                   // Determine theme: URL param > localStorage > system preference
                   let theme;
@@ -70,29 +65,6 @@ export default function RootLayout({
 
                     if (!theme) {
                       theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-                    }
-                  }
-
-                  // Apply scale if valid
-                  if (isValidScale) {
-                    document.documentElement.style.fontSize = `${scaleValue}rem`;
-                    try {
-                      localStorage.setItem('scale', String(scaleValue));
-                    } catch (e) {
-                      console.error('Error saving scale to localStorage:', e);
-                    }
-                  } else {
-                    // Check for saved scale
-                    try {
-                      const savedScale = localStorage.getItem('scale');
-                      if (savedScale) {
-                        const savedScaleValue = parseFloat(savedScale);
-                        if (!isNaN(savedScaleValue) && savedScaleValue > 0 && savedScaleValue <= 2) {
-                          document.documentElement.style.fontSize = `${savedScaleValue}rem`;
-                        }
-                      }
-                    } catch (e) {
-                      console.error('Error reading scale from localStorage:', e);
                     }
                   }
 
