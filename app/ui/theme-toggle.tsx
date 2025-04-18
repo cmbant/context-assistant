@@ -12,7 +12,7 @@ export default function ThemeToggle() {
         console.log('Theme toggle button clicked')
         toggleTheme()
       }}
-      className="p-2 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center justify-center"
+      className="p-2 rounded-md bg-gray-100 hover:bg-gray-200 dark:bg-transparent dark:hover:bg-gray-800 transition-colors flex items-center justify-center"
       aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
     >
       {theme === 'light' ? (
