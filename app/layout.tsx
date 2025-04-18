@@ -27,9 +27,27 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
-                // Check for saved theme preference or use browser default
-                const theme = localStorage.getItem('theme') ||
-                  (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                // Function to get URL parameters
+                function getUrlParam(name) {
+                  const urlParams = new URLSearchParams(window.location.search);
+                  return urlParams.get(name);
+                }
+
+                // Check for URL parameter first (highest priority)
+                const urlTheme = getUrlParam('theme');
+                const isValidTheme = urlTheme === 'dark' || urlTheme === 'light';
+
+                // Determine theme: URL param > localStorage > system preference
+                let theme;
+                if (isValidTheme) {
+                  theme = urlTheme;
+                  // Save to localStorage to persist the choice
+                  localStorage.setItem('theme', theme);
+                } else {
+                  // Check for saved theme preference or use browser default
+                  theme = localStorage.getItem('theme') ||
+                    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                }
 
                 // Apply theme immediately to prevent flash
                 if (theme === 'dark') {

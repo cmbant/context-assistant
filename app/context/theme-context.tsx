@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 
 type Theme = 'light' | 'dark'
 
@@ -17,40 +18,48 @@ const ThemeContext = createContext<ThemeContextType>({
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>('light')
   const [mounted, setMounted] = useState(false)
+  const searchParams = useSearchParams()
 
   // Once mounted on client, now we can show the UI
   useEffect(() => {
     setMounted(true)
 
+    // Check for URL parameter first (highest priority)
+    const urlTheme = searchParams.get('theme') as Theme | null
+    const isValidTheme = urlTheme === 'dark' || urlTheme === 'light'
+
     // Check for user preference in localStorage
     const savedTheme = localStorage.getItem('theme') as Theme | null
 
-    // If user has a saved preference, use that
-    if (savedTheme) {
-      setTheme(savedTheme)
-      document.documentElement.classList.toggle('dark', savedTheme === 'dark')
-      if (savedTheme === 'dark') {
-        document.documentElement.style.backgroundColor = '#1a202c'
-        document.body.style.backgroundColor = '#1a202c'
-      } else {
-        document.documentElement.style.backgroundColor = '#ffffff'
-        document.body.style.backgroundColor = '#ffffff'
-      }
-    }
-    // Otherwise check system preference
-    else {
+    // Determine which theme to use (URL param > localStorage > system preference)
+    let themeToUse: Theme
+
+    if (isValidTheme) {
+      // URL parameter takes precedence
+      themeToUse = urlTheme as Theme
+      // Save to localStorage to persist the choice
+      localStorage.setItem('theme', themeToUse)
+    } else if (savedTheme) {
+      // If no URL param but we have localStorage setting
+      themeToUse = savedTheme
+    } else {
+      // Fall back to system preference
       const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-      setTheme(systemPrefersDark ? 'dark' : 'light')
-      document.documentElement.classList.toggle('dark', systemPrefersDark)
-      if (systemPrefersDark) {
-        document.documentElement.style.backgroundColor = '#1a202c'
-        document.body.style.backgroundColor = '#1a202c'
-      } else {
-        document.documentElement.style.backgroundColor = '#ffffff'
-        document.body.style.backgroundColor = '#ffffff'
-      }
+      themeToUse = systemPrefersDark ? 'dark' : 'light'
     }
-  }, [])
+
+    // Apply the selected theme
+    setTheme(themeToUse)
+    document.documentElement.classList.toggle('dark', themeToUse === 'dark')
+
+    if (themeToUse === 'dark') {
+      document.documentElement.style.backgroundColor = '#1a202c'
+      document.body.style.backgroundColor = '#1a202c'
+    } else {
+      document.documentElement.style.backgroundColor = '#ffffff'
+      document.body.style.backgroundColor = '#ffffff'
+    }
+  }, [searchParams])
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light'
