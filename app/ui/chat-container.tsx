@@ -4,7 +4,7 @@ import { useState } from 'react';
 import ProgramTabs from './program-tabs';
 import ChatSimple from './chat-simple';
 import ModelSelector from './model-selector';
-import ThemeToggle from './theme-toggle';
+import ThemeWrapper from './theme-wrapper';
 import { Program } from '@/app/utils/types';
 import { loadConfig } from '@/app/utils/config';
 
@@ -96,7 +96,7 @@ export default function ChatContainer({
                 <span className="hidden sm:inline">Docs</span>
                 <span className="sm:hidden">📖</span>
               </a>
-              <ThemeToggle />
+              <ThemeWrapper />
             </div>
           </div>
         </div>

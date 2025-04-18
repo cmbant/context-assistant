@@ -27,37 +27,59 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
-                // Function to get URL parameters
-                function getUrlParam(name) {
-                  const urlParams = new URLSearchParams(window.location.search);
-                  return urlParams.get(name);
-                }
+                try {
+                  // Function to get URL parameters - more robust implementation
+                  function getUrlParam(name) {
+                    try {
+                      if (typeof window !== 'undefined') {
+                        const urlParams = new URLSearchParams(window.location.search);
+                        return urlParams.get(name);
+                      }
+                    } catch (e) {
+                      console.error('Error getting URL params:', e);
+                    }
+                    return null;
+                  }
 
-                // Check for URL parameter first (highest priority)
-                const urlTheme = getUrlParam('theme');
-                const isValidTheme = urlTheme === 'dark' || urlTheme === 'light';
+                  // Check for URL parameter first (highest priority)
+                  const urlTheme = getUrlParam('theme');
+                  const isValidTheme = urlTheme === 'dark' || urlTheme === 'light';
 
-                // Determine theme: URL param > localStorage > system preference
-                let theme;
-                if (isValidTheme) {
-                  theme = urlTheme;
-                  // Save to localStorage to persist the choice
-                  localStorage.setItem('theme', theme);
-                } else {
-                  // Check for saved theme preference or use browser default
-                  theme = localStorage.getItem('theme') ||
-                    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-                }
+                  // Determine theme: URL param > localStorage > system preference
+                  let theme;
+                  if (isValidTheme) {
+                    theme = urlTheme;
+                    // Save to localStorage to persist the choice
+                    try {
+                      localStorage.setItem('theme', theme);
+                    } catch (e) {
+                      console.error('Error saving theme to localStorage:', e);
+                    }
+                  } else {
+                    // Check for saved theme preference or use browser default
+                    try {
+                      theme = localStorage.getItem('theme');
+                    } catch (e) {
+                      console.error('Error reading theme from localStorage:', e);
+                    }
 
-                // Apply theme immediately to prevent flash
-                if (theme === 'dark') {
-                  document.documentElement.classList.add('dark');
-                  document.documentElement.style.backgroundColor = '#1a202c';
-                  if (document.body) document.body.style.backgroundColor = '#1a202c';
-                } else {
-                  document.documentElement.classList.remove('dark');
-                  document.documentElement.style.backgroundColor = '#ffffff';
-                  if (document.body) document.body.style.backgroundColor = '#ffffff';
+                    if (!theme) {
+                      theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                    }
+                  }
+
+                  // Apply theme immediately to prevent flash
+                  if (theme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                    document.documentElement.style.backgroundColor = '#1a202c';
+                    if (document.body) document.body.style.backgroundColor = '#1a202c';
+                  } else {
+                    document.documentElement.classList.remove('dark');
+                    document.documentElement.style.backgroundColor = '#ffffff';
+                    if (document.body) document.body.style.backgroundColor = '#ffffff';
+                  }
+                } catch (e) {
+                  console.error('Error in theme initialization script:', e);
                 }
               })()
             `,

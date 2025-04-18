@@ -24,40 +24,46 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setMounted(true)
 
+    // Function to apply theme
+    const applyTheme = (newTheme: Theme) => {
+      setTheme(newTheme)
+      document.documentElement.classList.toggle('dark', newTheme === 'dark')
+
+      if (newTheme === 'dark') {
+        document.documentElement.style.backgroundColor = '#1a202c'
+        document.body.style.backgroundColor = '#1a202c'
+      } else {
+        document.documentElement.style.backgroundColor = '#ffffff'
+        document.body.style.backgroundColor = '#ffffff'
+      }
+    }
+
     // Check for URL parameter first (highest priority)
-    const urlTheme = searchParams.get('theme') as Theme | null
-    const isValidTheme = urlTheme === 'dark' || urlTheme === 'light'
+    let urlTheme: Theme | null = null
+    if (searchParams) {
+      const themeParam = searchParams.get('theme')
+      if (themeParam === 'dark' || themeParam === 'light') {
+        urlTheme = themeParam as Theme
+      }
+    }
 
     // Check for user preference in localStorage
     const savedTheme = localStorage.getItem('theme') as Theme | null
 
     // Determine which theme to use (URL param > localStorage > system preference)
-    let themeToUse: Theme
-
-    if (isValidTheme) {
+    if (urlTheme) {
       // URL parameter takes precedence
-      themeToUse = urlTheme as Theme
+      applyTheme(urlTheme)
       // Save to localStorage to persist the choice
-      localStorage.setItem('theme', themeToUse)
+      localStorage.setItem('theme', urlTheme)
     } else if (savedTheme) {
       // If no URL param but we have localStorage setting
-      themeToUse = savedTheme
+      applyTheme(savedTheme)
     } else {
       // Fall back to system preference
       const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-      themeToUse = systemPrefersDark ? 'dark' : 'light'
-    }
-
-    // Apply the selected theme
-    setTheme(themeToUse)
-    document.documentElement.classList.toggle('dark', themeToUse === 'dark')
-
-    if (themeToUse === 'dark') {
-      document.documentElement.style.backgroundColor = '#1a202c'
-      document.body.style.backgroundColor = '#1a202c'
-    } else {
-      document.documentElement.style.backgroundColor = '#ffffff'
-      document.body.style.backgroundColor = '#ffffff'
+      const themeToUse = systemPrefersDark ? 'dark' : 'light'
+      applyTheme(themeToUse)
     }
   }, [searchParams])
 
