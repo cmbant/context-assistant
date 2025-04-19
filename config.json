@@ -46,7 +46,7 @@
     },
     {
       "id": "gemini/gemini-2.5-flash-preview-04-17",
-      "name": "Gemini 2.5 Flash Preview",
+      "name": "Gemini 2.5 Flash",
       "description": "Latest Gemini Flash model with improved capabilities",
       "options": {
         "temperature": 0.7,
