@@ -1,7 +1,10 @@
 import { Config, Program } from './types';
 
 // Import the config directly
-import configJson from '../../config.json';
+import rawConfigJson from '../../config.json';
+
+// Add type assertion to include the new greeting property
+const configJson = rawConfigJson as unknown as Partial<Config>;
 
 // Default configuration for non-program settings
 const defaultConfig: Partial<Config> = {
