@@ -25,6 +25,7 @@ export interface Config {
   defaultProgram: string;
   showContextLink?: boolean;
   simpleMode?: boolean; // Flag to hide top panels when only one code and model
+  greeting?: string; // Global greeting message to display in chat
   apiKeys?: {
     openai?: string;
     gemini?: string;

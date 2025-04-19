@@ -38,7 +38,7 @@ export default function ChatSimple({
   const greetingMessageRef = useRef<Message>({
     id: "greeting",
     role: "assistant",
-    content: `Welcome to the ${programId} help assistant. ${greeting}`,
+    content: greeting,
     createdAt: new Date(0), // Use a consistent date initially
   });
 
@@ -48,7 +48,7 @@ export default function ChatSimple({
     greetingMessageRef.current = {
       id: "greeting",
       role: "assistant",
-      content: `Welcome to the ${programId} help assistant. ${greeting}`,
+      content: greeting,
       createdAt: new Date()
     };
 

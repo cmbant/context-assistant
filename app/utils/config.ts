@@ -7,6 +7,7 @@ import configJson from '../../config.json';
 const defaultConfig: Partial<Config> = {
   showContextLink: true, // Set to false to hide the context link
   simpleMode: false, // Set to true to hide top panels when only one code and model
+  greeting: "How can I help you?", // Default greeting message
   apiKeys: {
     // These are just placeholders, actual keys should be set in environment variables
     openai: process.env.OPENAI_API_KEY,
@@ -27,6 +28,7 @@ export function loadConfig(): Config {
     defaultProgram: configJson.defaultProgram,
     showContextLink: configJson.showContextLink !== undefined ? configJson.showContextLink : defaultConfig.showContextLink,
     simpleMode: configJson.simpleMode !== undefined ? configJson.simpleMode : defaultConfig.simpleMode,
+    greeting: configJson.greeting !== undefined ? configJson.greeting : defaultConfig.greeting,
     defaultModelId: configJson.defaultModelId || 'gemini/gemini-2.0-flash',
     availableModels: configJson.availableModels || [],
     // Load the new flags, defaulting to true if not present in config.json

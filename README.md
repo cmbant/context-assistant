@@ -50,6 +50,7 @@ The application supports several UI configuration options in `config.json`:
 
 - **showContextLink**: When set to `false`, hides the context download link in the UI
 - **simpleMode**: When set to `true`, hides all top panels (description, tabs, doc links, theme toggle, model selection) when there's only one program and one model configured. This is useful for embedding the chat interface in other applications.
+- **greeting**: Customizes the greeting message displayed at the start of the chat. Defaults to "How can I help you?"
 
 ## Running the Application
 

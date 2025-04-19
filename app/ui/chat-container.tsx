@@ -110,7 +110,7 @@ export default function ChatContainer({
       <ChatSimple
         /* Remove key to prevent re-render when program changes */
         programId={activeProgram}
-        greeting={`How can I help you?`}
+        greeting={config.greeting || "How can I help you?"}
         selectedModelId={selectedModelId}
       />
     </div>
