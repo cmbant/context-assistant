@@ -3,8 +3,43 @@ import { Config, Program } from './types';
 // Import the config directly
 import rawConfigJson from '../../config.json';
 
-// Add type assertion to include the new greeting property
-const configJson = rawConfigJson as unknown as Partial<Config>;
+/**
+ * Type definition for the raw config.json file structure
+ * This helps TypeScript understand what properties are available in the imported JSON
+ */
+interface RawConfigJson {
+  systemPrompt?: string;
+  programs: Array<{
+    id: string;
+    name: string;
+    description: string;
+    contextFiles: string[];
+    combinedContextFile?: string;
+    docsUrl: string;
+    extraSystemPrompt?: string;
+  }>;
+  defaultProgram: string;
+  showContextLink?: boolean;
+  simpleMode?: boolean;
+  greeting?: string;
+  defaultModelId: string;
+  useDirectOpenAIKey?: boolean;
+  useDirectGeminiKey?: boolean;
+  availableModels: Array<{
+    id: string;
+    name: string;
+    description?: string;
+    options?: {
+      temperature?: number;
+      max_completion_tokens?: number;
+      stream?: boolean;
+      [key: string]: any;
+    };
+  }>;
+}
+
+// Add type assertion to include all properties
+const configJson = rawConfigJson as RawConfigJson;
 
 // Default configuration for non-program settings
 const defaultConfig: Partial<Config> = {

@@ -155,6 +155,53 @@ This application can be deployed to Vercel with minimal configuration:
 
 The build process will automatically generate the combined context files during deployment.
 
+## Development Best Practices
+
+To ensure code quality and prevent build errors, follow these best practices when contributing to this project:
+
+### Type Checking
+
+Always run type checking before committing changes:
+
+```bash
+npm run type-check
+```
+
+This will catch TypeScript errors that might cause build failures on deployment.
+
+### Config Validation
+
+When modifying the `config.json` file or the `Config` interface in `app/utils/types.ts`, validate that they remain compatible:
+
+```bash
+npm run validate-config
+```
+
+This script checks that the structure of `config.json` matches the TypeScript interface definitions.
+
+### Pre-commit Hooks
+
+The project uses Husky to run pre-commit checks automatically. These checks include:
+
+- TypeScript type checking
+- Config validation
+- ESLint linting
+
+These checks help catch errors before they're committed to the repository.
+
+### Adding New Configuration Options
+
+When adding new configuration options, follow these steps:
+
+1. Update the `Config` interface in `app/utils/types.ts`
+2. Update the `RawConfigJson` interface in `app/utils/config.ts`
+3. Add the new option to the default configuration in `app/utils/config.ts`
+4. Update the `loadConfig` function to handle the new option
+5. Add the new option to `config.json`
+6. Run validation: `npm run validate-config`
+
+Following this process ensures type safety and prevents build errors.
+
 ## Learn More
 
 ### Full-Context vs. RAG Approach
