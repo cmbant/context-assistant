@@ -44,63 +44,68 @@ export default function ChatContainer({
   const showTabs = programs.length > 1;
   const showContextLink = config.showContextLink !== false; // Default to true if not specified
 
+  // Check if we should use simple mode (hide top panels when only one code and model)
+  const useSimpleMode = config.simpleMode === true && programs.length === 1 && config.availableModels.length === 1;
+
   return (
     <div className="flex flex-col w-full mx-auto border border-gray-300 dark:border-gray-700 shadow-lg rounded-md overflow-hidden text-sm sm:text-base bg-white dark:bg-gray-900">
-      <div className="flex flex-col bg-white dark:bg-gray-900">
-        <div className="flex justify-between items-center">
-          <div className="flex-grow">
-            {showTabs && (
-              <ProgramTabs
-                programs={programs}
-                activeProgram={activeProgram}
-                onProgramChange={handleProgramChange}
-              />
+      {!useSimpleMode && (
+        <div className="flex flex-col bg-white dark:bg-gray-900">
+          <div className="flex justify-between items-center">
+            <div className="flex-grow">
+              {showTabs && (
+                <ProgramTabs
+                  programs={programs}
+                  activeProgram={activeProgram}
+                  onProgramChange={handleProgramChange}
+                />
+              )}
+            </div>
+            {config.availableModels.length > 1 && (
+              <div className="p-2 relative w-56">
+                <ModelSelector
+                  models={config.availableModels}
+                  selectedModelId={selectedModelId}
+                  onModelChange={handleModelChange}
+                />
+              </div>
             )}
           </div>
-          {config.availableModels.length > 1 && (
-            <div className="p-2 relative w-56">
-              <ModelSelector
-                models={config.availableModels}
-                selectedModelId={selectedModelId}
-                onModelChange={handleModelChange}
-              />
-            </div>
-          )}
-        </div>
 
-        <div className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300 border-b border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900">
-          <div className="flex justify-between items-center">
-            <div>
-              {currentProgram.description}
-            </div>
-            <div className="flex space-x-4 items-center">
-              {showContextLink && (
+          <div className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300 border-b border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900">
+            <div className="flex justify-between items-center">
+              <div>
+                {currentProgram.description}
+              </div>
+              <div className="flex space-x-4 items-center">
+                {showContextLink && (
+                  <a
+                    href={`/api/context/${currentProgram.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 hover:underline whitespace-nowrap"
+                    title="View and download the LLM document context file"
+                  >
+                    <span className="hidden sm:inline">Context</span>
+                    <span className="sm:hidden">📄</span>
+                  </a>
+                )}
                 <a
-                  href={`/api/context/${currentProgram.id}`}
+                  href={currentProgram.docsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-500 hover:underline whitespace-nowrap"
-                  title="View and download the LLM document context file"
+                  title="View official documentation"
                 >
-                  <span className="hidden sm:inline">Context</span>
-                  <span className="sm:hidden">📄</span>
+                  <span className="hidden sm:inline">Docs</span>
+                  <span className="sm:hidden">📖</span>
                 </a>
-              )}
-              <a
-                href={currentProgram.docsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-500 hover:underline whitespace-nowrap"
-                title="View official documentation"
-              >
-                <span className="hidden sm:inline">Docs</span>
-                <span className="sm:hidden">📖</span>
-              </a>
-              <ThemeWrapper />
+                <ThemeWrapper />
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       <ChatSimple
         /* Remove key to prevent re-render when program changes */

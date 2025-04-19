@@ -30,6 +30,7 @@
   ],
   "defaultProgram": "camb",
   "showContextLink": true,
+  "simpleMode": false,
   "defaultModelId": "gemini/gemini-2.0-flash",
   "useDirectOpenAIKey": true,
   "useDirectGeminiKey": true,

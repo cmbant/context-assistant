@@ -24,6 +24,7 @@ export interface Config {
   programs: Program[];
   defaultProgram: string;
   showContextLink?: boolean;
+  simpleMode?: boolean; // Flag to hide top panels when only one code and model
   apiKeys?: {
     openai?: string;
     gemini?: string;

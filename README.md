@@ -17,7 +17,7 @@ This application was built using NextJS + ReactJS + TypeScript and supports mult
 
 ## Configuration Options
 
-This application supports multiple AI providers and models through a unified API interface:
+This application supports multiple AI providers and models through a unified API interface. Configuration is managed through the `config.json` file:
 
 ### Supported AI Providers
 
@@ -43,6 +43,13 @@ Recommended minimum context lengths:
 - For large documentation: 128K+ tokens
 
 You can switch between models in the UI based on your needs for speed, accuracy, and context length capacity.
+
+### UI Configuration Options
+
+The application supports several UI configuration options in `config.json`:
+
+- **showContextLink**: When set to `false`, hides the context download link in the UI
+- **simpleMode**: When set to `true`, hides all top panels (description, tabs, doc links, theme toggle, model selection) when there's only one program and one model configured. This is useful for embedding the chat interface in other applications.
 
 ## Running the Application
 
