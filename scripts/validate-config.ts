@@ -62,6 +62,11 @@ function validateConfig() {
       throw new Error(`defaultModelId '${configJson.defaultModelId}' does not exist in the availableModels list`);
     }
 
+    // Validate fallbackModelId exists in availableModels if provided
+    if (configJson.fallbackModelId && !modelIds.includes(configJson.fallbackModelId)) {
+      throw new Error(`fallbackModelId '${configJson.fallbackModelId}' does not exist in the availableModels list`);
+    }
+
     console.log('✅ config.json is valid!');
     process.exit(0);
   } catch (error) {

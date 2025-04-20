@@ -23,6 +23,7 @@ interface RawConfigJson {
   simpleMode?: boolean;
   greeting?: string;
   defaultModelId: string;
+  fallbackModelId?: string;
   useDirectOpenAIKey?: boolean;
   useDirectGeminiKey?: boolean;
   availableModels: Array<{
@@ -68,6 +69,7 @@ export function loadConfig(): Config {
     simpleMode: configJson.simpleMode !== undefined ? configJson.simpleMode : defaultConfig.simpleMode,
     greeting: configJson.greeting !== undefined ? configJson.greeting : defaultConfig.greeting,
     defaultModelId: configJson.defaultModelId || 'gemini/gemini-2.0-flash',
+    fallbackModelId: configJson.fallbackModelId, // Optional fallback model ID
     availableModels: configJson.availableModels || [],
     // Load the new flags, defaulting to true if not present in config.json
     useDirectOpenAIKey: configJson.useDirectOpenAIKey ?? true,

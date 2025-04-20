@@ -32,7 +32,8 @@
   "showContextLink": true,
   "simpleMode": false,
   "greeting": "How can I help you?",
-  "defaultModelId": "gemini/gemini-2.0-flash",
+  "defaultModelId": "gemini/gemini-2.5-flash-preview-04-17",
+  "fallbackModelId": "openai/gpt-4.1-mini-2025-04-14",
   "useDirectOpenAIKey": true,
   "useDirectGeminiKey": true,
   "availableModels": [
@@ -48,8 +49,8 @@
     },
     {
       "id": "gemini/gemini-2.5-flash-preview-04-17",
-      "name": "Gemini 2.5 Flash",
-      "description": "Latest Gemini Flash model with improved capabilities",
+      "name": "Gemini Flash",
+      "description": "Latest Gemini Flash model",
       "options": {
         "temperature": 0.7,
         "max_completion_tokens": 4096,
