@@ -69,7 +69,8 @@ export function getEmbeddedContext(programId: string): string | undefined {
 export function getSystemPromptWithContext(programId: string, context: string): string {
   // Get the program configuration and global config
   const program = getProgramById(programId) as Program;
-  const config = require('../../config.json');
+  const { loadConfig } = require('./config');
+  const config = loadConfig();
 
   // Get program name and uppercase ID
   const programName = program?.name || programId.toUpperCase();
@@ -83,6 +84,11 @@ export function getSystemPromptWithContext(programId: string, context: string): 
   // Add program-specific extra system prompt if available
   if (program?.extraSystemPrompt) {
     systemPromptTemplate += `\n\n${program.extraSystemPrompt}`;
+  }
+
+  // Add additional context if available
+  if (config.additionalContext) {
+    systemPromptTemplate += `\n\nUSER CONTEXT:\n${config.additionalContext}`;
   }
 
   // Append the documentation to the system prompt

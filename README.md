@@ -52,6 +52,15 @@ The application supports several UI configuration options in `config.json`:
 - **simpleMode**: When set to `true`, hides all top panels (description, tabs, doc links, theme toggle, model selection) when there's only one program and one model configured. This is useful for embedding the chat interface in other applications.
 - **greeting**: Customizes the greeting message displayed at the start of the chat. Defaults to "How can I help you?"
 
+### URL Parameters
+
+The application supports several URL parameters for customization:
+
+- **theme**: Set to `dark` or `light` to override the theme preference
+- **scale**: Set to a decimal value (e.g., `0.8`) to scale the UI elements
+- **greeting**: Override the greeting message displayed at the start of the chat
+- **context**: Add additional context information that will be included in the system prompt
+
 ## Running the Application
 
 1. Ensure you have Node.js installed
