@@ -23,6 +23,7 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -99,6 +100,40 @@ export default async function RootLayout({
                   });
                 }, 1000);
               });
+            `,
+          }}
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  // Function to get URL parameters
+                  function getUrlParam(name) {
+                    try {
+                      if (typeof window !== 'undefined') {
+                        const urlParams = new URLSearchParams(window.location.search);
+                        return urlParams.get(name);
+                      }
+                    } catch (e) {
+                      console.error('Error getting URL params:', e);
+                    }
+                    return null;
+                  }
+
+                  // Check for scale parameter
+                  const urlScale = getUrlParam('scale');
+                  if (urlScale) {
+                    const scaleValue = parseFloat(urlScale);
+                    if (!isNaN(scaleValue) && scaleValue > 0) {
+                      // Apply scaling directly to the html element
+                      document.documentElement.style.fontSize = (16 * scaleValue) + 'px';
+                    }
+                  }
+                } catch (e) {
+                  console.error('Error in scale initialization script:', e);
+                }
+              })();
             `,
           }}
         />

@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Base font size is controlled by the scale parameter */
+html {
+  font-size: 16px; /* Default font size, will be overridden by scale parameter if present */
+}
+
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-rgb: 255, 255, 255;
