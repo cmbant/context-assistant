@@ -44,8 +44,9 @@ export default function ChatContainer({
   const showTabs = programs.length > 1;
   const showContextLink = config.showContextLink !== false; // Default to true if not specified
 
-  // Check if we should use simple mode (hide top panels when only one code and model)
-  const useSimpleMode = config.simpleMode === true && programs.length === 1 && config.availableModels.length === 1;
+  // Check if we should use simple mode (hide top panels when simpleMode is enabled and only one program)
+  // Note: We no longer check the number of available models to allow for fallback models
+  const useSimpleMode = config.simpleMode === true && programs.length === 1;
 
   return (
     <div className="flex flex-col w-full mx-auto border border-gray-300 dark:border-gray-700 shadow-lg rounded-md overflow-hidden text-sm sm:text-base bg-white dark:bg-gray-900">
