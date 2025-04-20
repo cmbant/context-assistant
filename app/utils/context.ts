@@ -77,7 +77,9 @@ export function getSystemPromptWithContext(programId: string, context: string): 
   const programIdUpper = programId.toUpperCase();
 
   // Get the system prompt template and replace placeholders
-  let systemPromptTemplate = config.systemPrompt
+  // Load the system prompt from config.json if it's not available in the config object
+  const rawConfig = require('../../config.json');
+  let systemPromptTemplate = (config.systemPrompt || rawConfig.systemPrompt || '')
     .replace(/\{PROGRAM_ID\}/g, programIdUpper)
     .replace(/\{PROGRAM_NAME\}/g, programName);
 
