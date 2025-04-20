@@ -295,3 +295,8 @@ pre:hover .copy-code-button {
 .dark .katex .katex-html {
   color: rgb(var(--foreground-rgb-dark));
 }
+
+/* Ensure line breaks in user messages are preserved */
+.prose p {
+  white-space: pre-line;
+}

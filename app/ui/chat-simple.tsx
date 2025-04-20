@@ -33,6 +33,7 @@ export default function ChatSimple({
 
   // Store the selected model ID for reference
   const selectedModelIdRef = useRef<string>(selectedModelId);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Create a ref for the greeting message to avoid hydration mismatches
   const greetingMessageRef = useRef<Message>({
@@ -59,6 +60,16 @@ export default function ChatSimple({
     // Update the selected model ID reference
     selectedModelIdRef.current = selectedModelId;
   }, [programId, greeting, selectedModelId]);
+
+  // Auto-resize the textarea when the component mounts or when prompt changes
+  useEffect(() => {
+    if (textareaRef.current) {
+      // Reset height to auto to get the correct scrollHeight
+      textareaRef.current.style.height = 'auto';
+      // Set the height to scrollHeight to fit the content
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`;
+    }
+  }, [prompt]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -295,8 +306,24 @@ export default function ChatSimple({
   }
 
   // Handles changes to the prompt input field
-  function handlePromptChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function handlePromptChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
     setPrompt(e.target.value);
+
+    // Auto-resize the textarea
+    e.target.style.height = 'auto';
+    e.target.style.height = `${Math.min(e.target.scrollHeight, 200)}px`;
+  }
+
+  // Handle key down events for the textarea
+  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    // If Enter is pressed without Shift, submit the form
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (prompt.trim().length > 0 && !isLoading) {
+        const form = e.currentTarget.form;
+        if (form) form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+      }
+    }
   }
 
   // Handle cancellation of streaming response
@@ -341,11 +368,14 @@ export default function ChatSimple({
       <div className="p-2 border-t border-gray-300 dark:border-gray-700">
         {/* Chat input form */}
         <form onSubmit={handleSubmit} className="flex">
-          <input
+          <textarea
+            ref={textareaRef}
             disabled={isLoading}
             autoFocus
-            className="border border-gray-300 dark:border-gray-700 rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800"
+            rows={1}
+            className="border border-gray-300 dark:border-gray-700 rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 resize-none overflow-hidden min-h-[38px]"
             onChange={handlePromptChange}
+            onKeyDown={handleKeyDown}
             value={prompt}
             placeholder={isLoading ? "Thinking..." : "Ask a question..."} />
           {isLoading ? (
@@ -395,6 +425,12 @@ function ChatMessage({ message }: { message: Message }) {
 
   const isUser = message.role === "user";
 
+  // Process content to preserve line breaks in user messages
+  // For user messages, ensure single line breaks are preserved by adding two spaces at the end of each line
+  const processedContent = isUser
+    ? message.content.split('\n').join('  \n')
+    : message.content;
+
   return (
     <div className={`flex rounded-lg text-gray-700 dark:text-gray-200 px-3 sm:px-4 py-3 my-2 shadow-sm border ${isUser ? 'bg-blue-50 border-blue-100 dark:bg-blue-900 dark:border-blue-800' : 'bg-white border-gray-200 dark:bg-gray-800 dark:border-gray-700'}`}>
       <div className="text-2xl sm:text-3xl flex-shrink-0 flex items-start pt-1">
@@ -412,7 +448,8 @@ function ChatMessage({ message }: { message: Message }) {
                   className?: string;
                   children: React.ReactNode;
                 };
-                const match = /language-(\w+)/.exec(className || '');
+                // We're not using the language match but keeping it for future reference
+                // const match = /language-(\w+)/.exec(className || '');
 
                 // Extract text for copy button
                 const extractText = (node: any): string => {
@@ -453,7 +490,7 @@ function ChatMessage({ message }: { message: Message }) {
               }
             }}
           >
-            {message.content}
+            {processedContent}
         </Markdown>
       </div>
     </div>
