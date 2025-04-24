@@ -5,12 +5,111 @@ import { getEmbeddedContext as getEmbeddedContextFromModule } from './embedded-c
 // Cache for storing loaded context to avoid repeated lookups
 const combinedContextCache: Record<string, string> = {};
 
+// Cache for storing URL-based context to avoid repeated fetches
+const urlContextCache: Record<string, string> = {};
+
+// Function to check if a string is a URL
+function isUrl(str: string): boolean {
+  try {
+    new URL(str);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 /**
- * Load context for a program using the embedded context content
+ * Fetch context from a URL
+ * @param url The URL to fetch context from
+ * @returns The content of the context
+ */
+async function fetchContextFromUrl(url: string): Promise<{ content: string; wasFetched: boolean }> {
+  // Check if the URL context is already cached
+  if (urlContextCache[url]) {
+    // Return cached content without logging
+    return { content: urlContextCache[url], wasFetched: false };
+  }
+
+  // Only log when actually fetching
+  console.log(`Fetching context from URL: ${url}`);
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'Accept': 'text/plain, text/markdown, application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch context from URL: ${url}, status: ${response.status}`);
+    }
+
+    // Try to get the content type
+    const contentType = response.headers.get('Content-Type') || '';
+
+    let content: string;
+
+    // Handle different content types
+    if (contentType.includes('application/json')) {
+      // If it's JSON, stringify it
+      const json = await response.json();
+      content = JSON.stringify(json, null, 2);
+    } else {
+      // Otherwise treat as text
+      content = await response.text();
+    }
+
+    // Cache the content
+    urlContextCache[url] = content;
+    console.log(`Successfully fetched context from URL: ${url} (${content.length} bytes)`);
+
+    return { content, wasFetched: true };
+  } catch (error) {
+    console.error(`Error fetching context from URL: ${url}`, error);
+    throw error;
+  }
+}
+
+/**
+ * Load context for a program using either embedded context content or a URL
  * @param contextFiles Array of context file paths or a single context file path
+ * @param programId Optional program ID to directly load context for a specific program
  * @returns The content of the combined context
  */
-export async function loadContext(contextFiles: string[] | string): Promise<string> {
+export async function loadContext(contextFiles: string[] | string, programId?: string): Promise<string> {
+  // If programId is provided, use it directly
+  if (programId) {
+    const program = getProgramById(programId) as Program;
+
+    if (!program) {
+      console.error(`Program not found: ${programId}`);
+      return `Context could not be loaded. Program ${programId} not found.`;
+    }
+
+    // Check if the program has a combinedContextFile that is a URL
+    if (program.combinedContextFile && isUrl(program.combinedContextFile)) {
+      try {
+        // Fetch the context from the URL
+        const { content } = await fetchContextFromUrl(program.combinedContextFile);
+        return content;
+      } catch (error) {
+        console.error(`Error fetching context from URL for program ${programId}:`, error);
+        // Fall back to embedded context if URL fetch fails
+        console.log(`Falling back to embedded context for program: ${programId}`);
+      }
+    }
+
+    // Use embedded context as fallback or if no URL is provided
+    const contextContent = getEmbeddedContextFromModule(programId);
+
+    if (!contextContent) {
+      console.error(`No embedded context found for program: ${programId}`);
+      return `Context could not be loaded. No embedded context found for program: ${programId}.`;
+    }
+
+    console.log(`Using embedded context for ${programId} (${contextContent.length} bytes)`);
+    return contextContent;
+  }
+
   // Convert single file to array for consistent handling
   const filesArray = typeof contextFiles === 'string' ? [contextFiles] : contextFiles;
 
@@ -30,6 +129,22 @@ export async function loadContext(contextFiles: string[] | string): Promise<stri
   if (!program) {
     console.error(`No program found for context files: ${filesArray.join(', ')}`);
     return `Context could not be loaded. No matching program found for the specified context files.`;
+  }
+
+  // Check if the program has a combinedContextFile that is a URL
+  if (program.combinedContextFile && isUrl(program.combinedContextFile)) {
+    try {
+      // Fetch the context from the URL
+      const { content } = await fetchContextFromUrl(program.combinedContextFile);
+
+      // Cache the content
+      combinedContextCache[cacheKey] = content;
+      return content;
+    } catch (error) {
+      console.error(`Error fetching context from URL for program ${program.id}:`, error);
+      // Fall back to embedded context if URL fetch fails
+      console.log(`Falling back to embedded context for program: ${program.id}`);
+    }
   }
 
   console.log(`Loading embedded context for program: ${program.id}`);
@@ -58,6 +173,34 @@ export async function loadContext(contextFiles: string[] | string): Promise<stri
 export function getEmbeddedContext(programId: string): string | undefined {
   // Re-export from embedded-context.ts
   return getEmbeddedContextFromModule(programId);
+}
+
+/**
+ * Preload context for a program
+ * This is useful for preloading context when a tab becomes active
+ * @param programId The ID of the program
+ * @returns A promise that resolves when the context is loaded
+ */
+export async function preloadContext(programId: string): Promise<void> {
+  try {
+    const program = getProgramById(programId) as Program;
+
+    if (!program) {
+      console.error(`Program not found for preloading: ${programId}`);
+      return;
+    }
+
+    // If the program has a combinedContextFile that is a URL, preload it
+    if (program.combinedContextFile && isUrl(program.combinedContextFile)) {
+      // Fetch the context, but only log if it was actually fetched (not cached)
+      const { wasFetched } = await fetchContextFromUrl(program.combinedContextFile);
+      if (wasFetched) {
+        console.log(`Preloaded context for program: ${programId}`);
+      }
+    }
+  } catch (error) {
+    console.error(`Error preloading context for program ${programId}:`, error);
+  }
 }
 
 /**

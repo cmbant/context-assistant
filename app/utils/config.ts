@@ -13,8 +13,8 @@ interface RawConfigJson {
     id: string;
     name: string;
     description: string;
-    contextFiles: string[];
-    combinedContextFile?: string;
+    contextFiles: string[]; // Can be empty if combinedContextFile is a URL
+    combinedContextFile?: string; // Can be a URL to fetch context from
     docsUrl: string;
     extraSystemPrompt?: string;
   }>;

@@ -20,19 +20,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Load context for the program
-    let contextToLoad: string | string[] = [];
-
-    // Check if program has contextFiles array
-    if (program && 'contextFiles' in program && Array.isArray(program.contextFiles)) {
-      contextToLoad = program.contextFiles;
-    }
-    // Fallback to single contextFile if available
-    else if (program && 'contextFile' in program && typeof program.contextFile === 'string') {
-      contextToLoad = program.contextFile;
-    }
-
-    const context = await loadContext(contextToLoad);
+    // Load context for the program directly using the programId
+    // This will handle URL-based context files automatically
+    const context = await loadContext([], programId);
 
     // Create system message with context
     const systemMessage = {

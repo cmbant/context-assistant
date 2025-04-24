@@ -1,12 +1,13 @@
 'use client'
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ProgramTabs from './program-tabs';
 import ChatSimple from './chat-simple';
 import ModelSelector from './model-selector';
 import ThemeWrapper from './theme-wrapper';
 import { Program } from '@/app/utils/types';
 import { loadConfig } from '@/app/utils/config';
+import { preloadContext } from '@/app/utils/context';
 
 interface ChatContainerProps {
   programs: Program[];
@@ -21,6 +22,15 @@ export default function ChatContainer({
   const [activeProgram, setActiveProgram] = useState(defaultProgramId);
   // Chat state is managed internally by ChatSimple component
   const [selectedModelId, setSelectedModelId] = useState<string>(config.defaultModelId);
+
+  // Preload context for the default program when the component mounts
+  useEffect(() => {
+    if (defaultProgramId) {
+      preloadContext(defaultProgramId).catch(error => {
+        console.error(`Error preloading context for default program ${defaultProgramId}:`, error);
+      });
+    }
+  }, [defaultProgramId]);
 
   // No need to initialize chat states as they're managed internally by ChatSimple
 

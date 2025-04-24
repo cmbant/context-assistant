@@ -23,8 +23,7 @@
       "id": "cobaya",
       "name": "Cobaya",
       "description": "Monte Carlo parameter estimation",
-      "contextFiles": ["cobaya_docs_combined.md"],
-      "combinedContextFile": "cobaya_docs_combined.md",
+      "combinedContextFile": "https://cobaya.readthedocs.io/en/latest/_static/cobaya_docs_combined.md",
       "docsUrl": "https://cobaya.readthedocs.io/"
     }
   ],

@@ -13,9 +13,9 @@ export interface Program {
   id: string;
   name: string;
   description: string;
-  contextFiles: string[];
+  contextFiles: string[]; // Can be empty if combinedContextFile is a URL
   contextFile?: string; // For backward compatibility
-  combinedContextFile?: string; // Name of the combined context file for download
+  combinedContextFile?: string; // Name of the combined context file for download or a URL to fetch context from
   docsUrl: string;
   extraSystemPrompt?: string; // Additional program-specific system prompt instructions
 }

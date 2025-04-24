@@ -28,9 +28,31 @@ for (const file of contextFiles) {
   }
 }
 
+// Function to check if a string is a URL
+function isUrl(str) {
+  try {
+    new URL(str);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 // Generate combined context files
 for (const program of programs) {
   try {
+    // Skip if combinedContextFile is a URL
+    if (program.combinedContextFile && isUrl(program.combinedContextFile)) {
+      console.log(`Skipping combined context generation for ${program.id} - using URL: ${program.combinedContextFile}`);
+      continue;
+    }
+
+    // Skip if contextFiles is empty or not an array
+    if (!program.contextFiles || !Array.isArray(program.contextFiles) || program.contextFiles.length === 0) {
+      console.log(`Skipping combined context generation for ${program.id} - no context files defined`);
+      continue;
+    }
+
     const contents = program.contextFiles.map(file => {
       const filePath = path.join(contextDir, file);
       if (!fs.existsSync(filePath)) {
@@ -41,6 +63,13 @@ for (const program of programs) {
     });
 
     const combinedContent = contents.join('\n\n---\n\n');
+
+    // Skip if no combinedContextFile is defined
+    if (!program.combinedContextFile) {
+      console.log(`Skipping combined context file output for ${program.id} - no combinedContextFile defined`);
+      continue;
+    }
+
     const outputPath = path.join(publicContextDir, program.combinedContextFile);
 
     fs.writeFileSync(outputPath, combinedContent, 'utf8');
