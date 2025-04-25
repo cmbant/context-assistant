@@ -9,7 +9,8 @@ const combinedContextCache: Record<string, string> = {};
 const urlContextCache: Record<string, string> = {};
 
 // Track pending fetches to avoid duplicate requests
-const pendingFetches: Record<string, Promise<{ content: string; wasFetched: boolean }> | undefined> = {};
+// Using any type to avoid TypeScript issues with Promise types
+const pendingFetches: Record<string, any> = {};
 
 // Function to check if a string is a URL
 function isUrl(str: string): boolean {
@@ -39,10 +40,11 @@ async function fetchContextFromUrl(url: string): Promise<{ content: string; wasF
     return pendingFetches[url];
   }
 
-  // Create a new fetch promise and store it in pendingFetches
-  const fetchPromise = (async () => {
-    // Only log when actually fetching
-    console.log(`Fetching context from URL: ${url}`);
+  // Only log when actually fetching
+  console.log(`Fetching context from URL: ${url}`);
+
+  // Create a new fetch promise
+  const fetchPromise = new Promise<{ content: string; wasFetched: boolean }>(async (resolve) => {
     try {
       const response = await fetch(url, {
         headers: {
@@ -76,20 +78,20 @@ async function fetchContextFromUrl(url: string): Promise<{ content: string; wasF
       // Remove from pending fetches
       delete pendingFetches[url];
 
-      return { content, wasFetched: true };
+      resolve({ content, wasFetched: true });
     } catch (error) {
       // Remove from pending fetches on error
       delete pendingFetches[url];
       console.error(`Error fetching context from URL: ${url}`, error);
 
-      // Instead of re-throwing the error, return a fallback response
+      // Instead of re-throwing the error, resolve with a fallback response
       // This prevents unhandled promise rejections
-      return {
+      resolve({
         content: `Error fetching context from URL: ${url}. ${error instanceof Error ? error.message : String(error)}`,
         wasFetched: true
-      };
+      });
     }
-  })();
+  });
 
   // Store the promise in pendingFetches
   pendingFetches[url] = fetchPromise;
