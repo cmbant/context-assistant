@@ -1,6 +1,6 @@
 # Full-Context Help Assistant
 
-This application provides an interactive help assistant for technical documentation. It's designed to provide accurate answers by sending the full documentation context to the AI model. The example implementation focuses on cosmology tools (CAMB, GetDist, and Cobaya), but the framework can be adapted for any technical documentation.
+This application provides an interactive help assistant for technical documentation. It's designed to provide accurate answers by sending the full documentation context to the AI model. The example config is for cosmology tools (CAMB, GetDist, and Cobaya), but the framework can be trivally adapted for any technical documentation.
 
 ![Help Assistant Screenshot](shot.png)
 *Screenshot of the Help Assistant interface showing the CAMB, GetDist, and Cobaya tabs with model selection*
@@ -9,6 +9,7 @@ Key features:
 
 * Support for multiple tools/documentation sets with a tab interface
 * Full context documentation for accurate answers without RAG
+* Support for both local and URL-based context files (always up-to-date documentation)
 * Multiple AI model options (OpenAI, Gemini, OpenRouter, etc.)
 * Streaming responses for real-time feedback
 * Cancellable requests
@@ -103,7 +104,9 @@ This can all be done automatically using e.g. vercel to host, building on a gith
 
 To add support for additional documentation sets:
 
-1. Update the configuration in `config.json` by adding a new entry to the `programs` array:
+1. Update the configuration in `config.json` by adding a new entry to the `programs` array. You can use either local context files or a URL-based context file:
+
+   **Option 1: Using Local Context Files**
    ```json
    {
      "id": "your-program-id",
@@ -116,14 +119,42 @@ To add support for additional documentation sets:
    }
    ```
 
-2. Add documentation files for your program in the `context` directory (e.g., `context/your-program-docs.md`)
+   **Option 2: Using a URL-Based Context File**
+   ```json
+   {
+     "id": "your-program-id",
+     "name": "Your Program Name",
+     "description": "Description of your program",
+     "contextFiles": [],
+     "combinedContextFile": "https://your-website.com/path/to/your-program-docs.md",
+     "docsUrl": "https://your-program-documentation-url/",
+     "extraSystemPrompt": "Additional instructions for the AI when answering about your program."
+   }
+   ```
 
-3. Run the build scripts to generate the combined context files:
+2. If using local context files, add documentation files for your program in the `context` directory (e.g., `context/your-program-docs.md`)
+
+3. If using local context files, run the build scripts to generate the combined context files:
    ```
    node scripts/build-context.js && node scripts/generate-context-module.js
    ```
 
 4. Ensure your documentation size is appropriate for the models you plan to use. If your documentation is large, you may need to split it into multiple files or use models with larger context windows.
+
+#### URL-Based Context Files
+
+Using URL-based context files offers several advantages:
+
+- **Always Up-to-Date**: The context is loaded directly from the URL, ensuring it's always the latest version
+- **No Local Storage Required**: No need to store context files in your repository
+- **Simplified Deployment**: No need to rebuild the application when documentation changes
+- **Automatic Preloading**: Context files are preloaded when a tab becomes active for better performance
+
+When using URL-based context files:
+- Set `contextFiles` to an empty array `[]`
+- Set `combinedContextFile` to the URL of your documentation file
+- The URL must be publicly accessible and return plain text or markdown content
+- The content is cached in memory after the first load to improve performance
 
 ### Modifying the UI
 
