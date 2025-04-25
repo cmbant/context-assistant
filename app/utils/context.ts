@@ -81,7 +81,13 @@ async function fetchContextFromUrl(url: string): Promise<{ content: string; wasF
       // Remove from pending fetches on error
       delete pendingFetches[url];
       console.error(`Error fetching context from URL: ${url}`, error);
-      throw error;
+
+      // Instead of re-throwing the error, return a fallback response
+      // This prevents unhandled promise rejections
+      return {
+        content: `Error fetching context from URL: ${url}. ${error instanceof Error ? error.message : String(error)}`,
+        wasFetched: true
+      };
     }
   })();
 
@@ -110,14 +116,15 @@ export async function loadContext(contextFiles: string[] | string, programId?: s
 
     // Check if the program has a combinedContextFile that is a URL
     if (program.combinedContextFile && isUrl(program.combinedContextFile)) {
-      try {
-        // Fetch the context from the URL
-        const { content } = await fetchContextFromUrl(program.combinedContextFile);
-        return content;
-      } catch (error) {
-        console.error(`Error fetching context from URL for program ${programId}:`, error);
-        // Fall back to embedded context if URL fetch fails
+      // Fetch the context from the URL - errors are handled inside fetchContextFromUrl
+      const { content } = await fetchContextFromUrl(program.combinedContextFile);
+
+      // If the content starts with "Error fetching context", it means there was an error
+      // In that case, fall back to embedded context
+      if (content.startsWith("Error fetching context")) {
         console.log(`Falling back to embedded context for program: ${programId}`);
+      } else {
+        return content;
       }
     }
 
@@ -156,17 +163,17 @@ export async function loadContext(contextFiles: string[] | string, programId?: s
 
   // Check if the program has a combinedContextFile that is a URL
   if (program.combinedContextFile && isUrl(program.combinedContextFile)) {
-    try {
-      // Fetch the context from the URL
-      const { content } = await fetchContextFromUrl(program.combinedContextFile);
+    // Fetch the context from the URL - errors are handled inside fetchContextFromUrl
+    const { content } = await fetchContextFromUrl(program.combinedContextFile);
 
+    // If the content starts with "Error fetching context", it means there was an error
+    // In that case, fall back to embedded context
+    if (content.startsWith("Error fetching context")) {
+      console.log(`Falling back to embedded context for program: ${program.id}`);
+    } else {
       // Cache the content
       combinedContextCache[cacheKey] = content;
       return content;
-    } catch (error) {
-      console.error(`Error fetching context from URL for program ${program.id}:`, error);
-      // Fall back to embedded context if URL fetch fails
-      console.log(`Falling back to embedded context for program: ${program.id}`);
     }
   }
 
