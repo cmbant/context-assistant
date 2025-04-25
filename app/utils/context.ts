@@ -8,6 +8,9 @@ const combinedContextCache: Record<string, string> = {};
 // Cache for storing URL-based context to avoid repeated fetches
 const urlContextCache: Record<string, string> = {};
 
+// Track pending fetches to avoid duplicate requests
+const pendingFetches: Record<string, Promise<{ content: string; wasFetched: boolean }> | undefined> = {};
+
 // Function to check if a string is a URL
 function isUrl(str: string): boolean {
   try {
@@ -21,7 +24,7 @@ function isUrl(str: string): boolean {
 /**
  * Fetch context from a URL
  * @param url The URL to fetch context from
- * @returns The content of the context
+ * @returns The content of the context and whether it was freshly fetched
  */
 async function fetchContextFromUrl(url: string): Promise<{ content: string; wasFetched: boolean }> {
   // Check if the URL context is already cached
@@ -30,43 +33,63 @@ async function fetchContextFromUrl(url: string): Promise<{ content: string; wasF
     return { content: urlContextCache[url], wasFetched: false };
   }
 
-  // Only log when actually fetching
-  console.log(`Fetching context from URL: ${url}`);
-  try {
-    const response = await fetch(url, {
-      headers: {
-        'Accept': 'text/plain, text/markdown, application/json'
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch context from URL: ${url}, status: ${response.status}`);
-    }
-
-    // Try to get the content type
-    const contentType = response.headers.get('Content-Type') || '';
-
-    let content: string;
-
-    // Handle different content types
-    if (contentType.includes('application/json')) {
-      // If it's JSON, stringify it
-      const json = await response.json();
-      content = JSON.stringify(json, null, 2);
-    } else {
-      // Otherwise treat as text
-      content = await response.text();
-    }
-
-    // Cache the content
-    urlContextCache[url] = content;
-    console.log(`Successfully fetched context from URL: ${url} (${content.length} bytes)`);
-
-    return { content, wasFetched: true };
-  } catch (error) {
-    console.error(`Error fetching context from URL: ${url}`, error);
-    throw error;
+  // Check if there's already a pending fetch for this URL
+  if (pendingFetches[url]) {
+    // Return the existing promise to avoid duplicate fetches
+    return pendingFetches[url];
   }
+
+  // Create a new fetch promise and store it in pendingFetches
+  const fetchPromise = (async () => {
+    // Only log when actually fetching
+    console.log(`Fetching context from URL: ${url}`);
+    try {
+      const response = await fetch(url, {
+        headers: {
+          'Accept': 'text/plain, text/markdown, application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch context from URL: ${url}, status: ${response.status}`);
+      }
+
+      // Try to get the content type
+      const contentType = response.headers.get('Content-Type') || '';
+
+      let content: string;
+
+      // Handle different content types
+      if (contentType.includes('application/json')) {
+        // If it's JSON, stringify it
+        const json = await response.json();
+        content = JSON.stringify(json, null, 2);
+      } else {
+        // Otherwise treat as text
+        content = await response.text();
+      }
+
+      // Cache the content
+      urlContextCache[url] = content;
+      console.log(`Successfully fetched context from URL: ${url} (${content.length} bytes)`);
+
+      // Remove from pending fetches
+      delete pendingFetches[url];
+
+      return { content, wasFetched: true };
+    } catch (error) {
+      // Remove from pending fetches on error
+      delete pendingFetches[url];
+      console.error(`Error fetching context from URL: ${url}`, error);
+      throw error;
+    }
+  })();
+
+  // Store the promise in pendingFetches
+  pendingFetches[url] = fetchPromise;
+
+  // Return the promise
+  return fetchPromise;
 }
 
 /**
