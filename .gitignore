@@ -48,3 +48,5 @@ test-gemini-api.js
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+.augment-guidelines

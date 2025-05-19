@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react';
-import { AiOutlineUser, AiOutlineRobot, AiOutlineSend, AiOutlineStop } from 'react-icons/ai';
+import { AiOutlineUser, AiOutlineRobot, AiOutlineSend } from 'react-icons/ai';
 import Markdown from 'react-markdown';
 import rehypeHighlight from 'rehype-highlight';
 import rehypeRaw from 'rehype-raw';
@@ -9,8 +9,7 @@ import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 // We'll handle syntax highlighting styles in globals.css
-import { Message, ModelConfig } from '@/app/utils/types';
-import ModelSelector from './model-selector';
+import { Message } from '@/app/utils/types';
 import CopyButton from './copy-button';
 
 export default function ChatSimple({
@@ -28,6 +27,7 @@ export default function ChatSimple({
   const [prompt, setPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [maxTextareaHeight, setMaxTextareaHeight] = useState(200); // Default max height
   const messageId = useRef(0);
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -42,6 +42,16 @@ export default function ChatSimple({
     content: greeting,
     createdAt: new Date(0), // Use a consistent date initially
   });
+
+  // Function to calculate the maximum textarea height based on window height
+  const calculateMaxTextareaHeight = () => {
+    if (typeof window !== 'undefined') {
+      // Use half of the window height, but no less than 200px and no more than 500px
+      const halfWindowHeight = window.innerHeight / 2;
+      return Math.max(200, Math.min(halfWindowHeight, 500));
+    }
+    return 200; // Default fallback
+  };
 
   // Update the greeting message and load messages for the current program
   useEffect(() => {
@@ -61,15 +71,40 @@ export default function ChatSimple({
     selectedModelIdRef.current = selectedModelId;
   }, [programId, greeting, selectedModelId]);
 
+  // Handle window resize to update the maximum textarea height
+  useEffect(() => {
+    // Calculate initial max height
+    setMaxTextareaHeight(calculateMaxTextareaHeight());
+
+    // Add resize event listener
+    const handleResize = () => {
+      setMaxTextareaHeight(calculateMaxTextareaHeight());
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    // Clean up event listener on component unmount
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
   // Auto-resize the textarea when the component mounts or when prompt changes
   useEffect(() => {
     if (textareaRef.current) {
       // Reset height to auto to get the correct scrollHeight
       textareaRef.current.style.height = 'auto';
-      // Set the height to scrollHeight to fit the content
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`;
+      // Set the height to scrollHeight to fit the content, but not exceeding maxTextareaHeight
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, maxTextareaHeight)}px`;
+
+      // Ensure scrollbar appears when content exceeds max height
+      if (textareaRef.current.scrollHeight > maxTextareaHeight) {
+        textareaRef.current.style.overflowY = 'auto';
+      } else {
+        textareaRef.current.style.overflowY = 'hidden';
+      }
     }
-  }, [prompt]);
+  }, [prompt, maxTextareaHeight]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -311,7 +346,14 @@ export default function ChatSimple({
 
     // Auto-resize the textarea
     e.target.style.height = 'auto';
-    e.target.style.height = `${Math.min(e.target.scrollHeight, 200)}px`;
+    e.target.style.height = `${Math.min(e.target.scrollHeight, maxTextareaHeight)}px`;
+
+    // Ensure scrollbar appears when content exceeds max height
+    if (e.target.scrollHeight > maxTextareaHeight) {
+      e.target.style.overflowY = 'auto';
+    } else {
+      e.target.style.overflowY = 'hidden';
+    }
   }
 
   // Handle key down events for the textarea
@@ -373,7 +415,7 @@ export default function ChatSimple({
             disabled={isLoading}
             autoFocus
             rows={1}
-            className="border border-gray-300 dark:border-gray-700 rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 resize-none overflow-hidden min-h-[38px]"
+            className="border border-gray-300 dark:border-gray-700 rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 resize-none overflow-y-auto min-h-[38px]"
             onChange={handlePromptChange}
             onKeyDown={handleKeyDown}
             value={prompt}
