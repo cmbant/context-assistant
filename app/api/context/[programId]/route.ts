@@ -32,11 +32,11 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ pr
         // Load context using the loadContext function which handles URLs
         const contextContent = await loadContext([], programId);
 
-        // Return the context as plain text
+        // Return the context as plain text with UTF-8 encoding
         return new Response(contextContent, {
           status: 200,
           headers: {
-            'Content-Type': 'text/markdown'
+            'Content-Type': 'text/plain; charset=utf-8'
           }
         });
       } catch (error) {
@@ -63,11 +63,11 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ pr
       );
     }
 
-    // Return the context as plain text
+    // Return the context as plain text with UTF-8 encoding
     return new Response(contextContent, {
       status: 200,
       headers: {
-        'Content-Type': 'text/markdown'
+        'Content-Type': 'text/plain; charset=utf-8'
       }
     });
   } catch (error) {
