@@ -31,7 +31,7 @@
   "showContextLink": true,
   "simpleMode": false,
   "greeting": "How can I help you?",
-  "defaultModelId": "gemini/gemini-2.5-flash-preview-04-17",
+  "defaultModelId": "gemini/gemini-2.5-flash-preview-05-20",
   "fallbackModelId": "openai/gpt-4.1-mini-2025-04-14",
   "useDirectOpenAIKey": true,
   "useDirectGeminiKey": true,
