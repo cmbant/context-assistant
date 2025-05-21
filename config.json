@@ -37,7 +37,7 @@
   "useDirectGeminiKey": true,
   "availableModels": [
     {
-      "id": "gemini/gemini-2.5-flash-preview-04-17",
+      "id": "gemini/gemini-2.5-flash-preview-05-20",
       "name": "Gemini Flash",
       "description": "Latest Gemini Flash model",
       "options": {
@@ -48,7 +48,7 @@
     },
     {
       "id": "gemini/gemini-2.5-pro-exp-03-25",
-      "name": "Gemini 2.5 Pro",
+      "name": "Gemini 2.5 Pro Exp",
       "description": "More powerful model for complex queries",
       "options": {
         "temperature": 0.7,
