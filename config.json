@@ -32,7 +32,7 @@
   "simpleMode": false,
   "greeting": "How can I help you?",
   "defaultModelId": "gemini/gemini-2.5-flash",
-  "fallbackModelId": "openai/gpt-4.1-mini-2025-04-14",
+  "fallbackModelId": "openai/gpt-5-mini",
   "useDirectOpenAIKey": true,
   "useDirectGeminiKey": true,
   "availableModels": [
@@ -47,21 +47,11 @@
       }
     },
     {
-      "id": "openai/gpt-4.1-mini-2025-04-14",
-      "name": "GPT-4.1 Mini",
-      "description": "OpenAI GPT-4.1 Mini model",
+      "id": "openai/gpt-5-mini",
+      "name": "GPT-5 Mini",
+      "description": "OpenAI GPT-5 Mini model",
       "options": {
         "temperature": 0.7,
-        "max_completion_tokens": 4096,
-        "stream": true
-      }
-    },
-    {
-      "id": "openai/o4-mini",
-      "name": "o4 Mini",
-      "description": "OpenAI thinking model",
-      "options": {
-        "temperature": 1,
         "max_completion_tokens": 4096,
         "stream": true
       }
