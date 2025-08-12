@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { loadContext, getSystemPromptWithContext } from '@/app/utils/context';
-import { getProgramById, loadConfig } from '@/app/utils/config';
+import { getProgramById, loadConfig, parseModelId } from '@/app/utils/config';
 import { createChatCompletion, createStreamingChatCompletion, logTokenUsage } from '@/app/utils/unified-client';
 
 // This enables Edge Functions in Vercel
@@ -24,9 +24,16 @@ export async function POST(request: NextRequest) {
     // This will handle URL-based context files automatically
     const context = await loadContext([], programId);
 
+    // Load config to check for fallback model and determine system role
+    const config = loadConfig();
+    const modelIdToUse = modelId || config.defaultModelId;
+    const { provider } = parseModelId(modelIdToUse);
+    const systemRole = provider === 'openai' ? 'developer' : 'system';
+
     // Create system message with context
+    // Use "developer" role for OpenAI models, "system" for others
     const systemMessage = {
-      role: "system",
+      role: systemRole,
       content: getSystemPromptWithContext(programId, context)
     };
 
@@ -45,11 +52,9 @@ export async function POST(request: NextRequest) {
       modelId: modelId || 'default',
       messageCount: messages.length,
       systemMessageLength: systemMessage.content.length,
-      streaming: stream
+      streaming: stream,
+      systemRole: systemRole
     });
-
-    // Load config to check for fallback model
-    const config = loadConfig();
     const fallbackModelId = config.fallbackModelId;
 
     try {
@@ -139,8 +144,25 @@ export async function POST(request: NextRequest) {
           if (fallbackModelId) {
             console.log(`Primary model failed, trying fallback model: ${fallbackModelId}`);
 
+            // Create appropriate system message for fallback model
+            const { provider: fallbackProvider } = parseModelId(fallbackModelId);
+            const fallbackSystemRole = fallbackProvider === 'openai' ? 'developer' : 'system';
+
+            const fallbackSystemMessage = {
+              role: fallbackSystemRole,
+              content: getSystemPromptWithContext(programId, context)
+            };
+
+            const fallbackMessages = [
+              fallbackSystemMessage,
+              ...messages.map((msg: any) => ({
+                role: msg.role,
+                content: msg.content
+              }))
+            ];
+
             // Try with the fallback model
-            const fallbackStreamingResponse = await createStreamingChatCompletion(fallbackModelId, allMessages);
+            const fallbackStreamingResponse = await createStreamingChatCompletion(fallbackModelId, fallbackMessages);
 
             // Check if the fallback streaming response is valid
             if (!fallbackStreamingResponse) {
@@ -246,8 +268,25 @@ export async function POST(request: NextRequest) {
             console.log(`Primary model failed, trying fallback model: ${fallbackModelId}`);
 
             try {
+              // Create appropriate system message for fallback model
+              const { provider: fallbackProvider } = parseModelId(fallbackModelId);
+              const fallbackSystemRole = fallbackProvider === 'openai' ? 'developer' : 'system';
+
+              const fallbackSystemMessage = {
+                role: fallbackSystemRole,
+                content: getSystemPromptWithContext(programId, context)
+              };
+
+              const fallbackMessages = [
+                fallbackSystemMessage,
+                ...messages.map((msg: any) => ({
+                  role: msg.role,
+                  content: msg.content
+                }))
+              ];
+
               // Try with the fallback model
-              const fallbackCompletion = await createChatCompletion(fallbackModelId, allMessages);
+              const fallbackCompletion = await createChatCompletion(fallbackModelId, fallbackMessages);
 
               // Log token usage for the fallback model
               if (fallbackCompletion.usage) {
