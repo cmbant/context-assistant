@@ -8,6 +8,31 @@ export const runtime = "edge";
 
 export async function POST(request: NextRequest) {
   try {
+    // Block external requests to prevent unauthorized API usage
+    const origin = request.headers.get('origin');
+    const host = request.headers.get('host');
+    const referer = request.headers.get('referer');
+
+    // Check if this is an internal request (from the same origin)
+    const isInternalRequest = origin && host && (
+      origin.includes(host) ||
+      (referer && referer.includes(host))
+    );
+
+    if (!isInternalRequest) {
+      return new Response(
+        JSON.stringify({
+          error: 'External access not allowed',
+          message: 'This API endpoint is only available for internal use',
+          timestamp: new Date().toISOString()
+        }),
+        {
+          status: 403,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
     // Parse message from post
     const { programId, messages, modelId, stream = false } = await request.json();
 

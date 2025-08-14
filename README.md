@@ -83,6 +83,7 @@ The application supports several URL parameters for customization:
 
    # For other providers as needed
    export SAMBA_NOVA_API_KEY='your-sambanova-api-key-here'
+
    ```
 
    Note: Only configure the API keys for the providers you plan to use.
@@ -194,6 +195,18 @@ This application can be deployed to Vercel with minimal configuration:
 3. Deploy the application
 
 The build process will automatically generate the combined context files during deployment.
+
+## Security
+
+### API Protection
+
+The chat API endpoint (`/api/unified-chat`) is automatically protected from external access to prevent unauthorized usage of your LLM services and avoid unexpected API costs.
+
+**How it works:**
+- Internal requests (from the web application itself) are automatically allowed
+- External requests (from other domains/applications) are blocked with a 403 Forbidden response
+
+This protection is always active and requires no configuration. The web interface will work normally while preventing external API abuse.
 
 ## Development Best Practices
 
