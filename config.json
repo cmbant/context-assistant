@@ -31,13 +31,13 @@
   "showContextLink": true,
   "simpleMode": false,
   "greeting": "How can I help you?",
-  "defaultModelId": "gemini/gemini-2.5-flash",
+  "defaultModelId": "gemini/gemini-flash-latest",
   "fallbackModelId": "openai/gpt-5-mini",
   "useDirectOpenAIKey": true,
   "useDirectGeminiKey": true,
   "availableModels": [
     {
-      "id": "gemini/gemini-2.5-flash",
+      "id": "gemini/gemini-flash-latest",
       "name": "Gemini Flash",
       "description": "Latest Gemini Flash model",
       "options": {
