@@ -6,7 +6,7 @@
     "dev": "node scripts/build-context.js && node scripts/generate-context-module.js && next dev",
     "build": "node scripts/build-context.js && node scripts/generate-context-module.js && next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint . --max-warnings 0",
     "type-check": "tsc --noEmit",
     "validate-config": "node scripts/validate-config.js",
     "test-dev": "node scripts/build-context.js && node scripts/generate-context-module.js && cross-env OPENAI_MODEL=gpt-5-mini next dev",
@@ -19,8 +19,8 @@
   "dependencies": {
     "highlight.js": "^11.11.1",
     "katex": "^0.16.9",
-    "next": "^15.4.6",
-    "openai": "^4.104.0",
+    "next": "^16.0.3",
+    "openai": "^6.9.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-icons": "5.5.0",
@@ -32,17 +32,18 @@
     "remark-math": "^6.0.0"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.17",
     "@tailwindcss/typography": "^0.5.16",
-    "@types/node": "^22.18.1",
+    "@types/node": "^24.10.1",
     "@types/react": "19",
     "@types/react-dom": "19",
-    "autoprefixer": "10.4.21",
+    "autoprefixer": "^10.4.22",
     "cross-env": "^10.0.0",
     "eslint": "^9.33.0",
-    "eslint-config-next": "^15.5.2",
+    "eslint-config-next": "^16.0.3",
     "husky": "^9.1.7",
     "postcss": "^8.5.6",
-    "tailwindcss": "3.3.5",
+    "tailwindcss": "^4.1.17",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2"
   }
