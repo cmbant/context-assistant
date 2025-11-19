@@ -29,17 +29,15 @@ export default async function RootLayout({
             __html: `
               (function() {
                 try {
-                  // Function to get URL parameters - more robust implementation
+                  // Function to get URL parameters
                   function getUrlParam(name) {
                     try {
-                      if (typeof window !== 'undefined') {
-                        const urlParams = new URLSearchParams(window.location.search);
-                        return urlParams.get(name);
-                      }
+                      const urlParams = new URLSearchParams(window.location.search);
+                      return urlParams.get(name);
                     } catch (e) {
                       console.error('Error getting URL params:', e);
+                      return null;
                     }
-                    return null;
                   }
 
                   // Check for URL parameter first (highest priority)
