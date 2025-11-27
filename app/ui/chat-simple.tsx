@@ -475,7 +475,7 @@ function ChatMessage({ message }: { message: Message }) {
 
   return (
     <div className={`flex rounded-lg text-gray-700 dark:text-gray-200 px-3 sm:px-4 py-3 my-2 shadow-sm border ${isUser ? 'bg-blue-50 border-blue-100 dark:bg-blue-900 dark:border-blue-800' : 'bg-white border-gray-200 dark:bg-gray-800 dark:border-gray-700'}`}>
-      <div className="text-2xl sm:text-3xl flex-shrink-0 flex items-start pt-1">
+      <div className="text-2xl sm:text-3xl shrink-0 flex items-start pt-1">
         {displayRole(message.role)}
       </div>
       <div className="ml-2 sm:mx-3 text-left w-full overflow-hidden prose dark:prose-invert max-w-none">

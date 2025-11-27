@@ -101,7 +101,7 @@ export default function ModelSelector({ models, selectedModelId, onModelChange }
 
       {isOpen && (
         <div
-          className="origin-top-right rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 dark:ring-gray-700 z-[100]"
+          className="origin-top-right rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 dark:ring-gray-700 z-100"
           role="menu"
           aria-orientation="vertical"
           aria-labelledby="model-selector"

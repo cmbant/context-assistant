@@ -63,7 +63,7 @@ export default function ChatContainer({
       {!useSimpleMode && (
         <div className="flex flex-col bg-white dark:bg-gray-900">
           <div className="flex justify-between items-center">
-            <div className="flex-grow">
+            <div className="grow">
               {showTabs && (
                 <ProgramTabs
                   programs={programs}
