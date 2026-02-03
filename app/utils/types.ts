@@ -37,6 +37,7 @@ export interface Config {
   useDirectOpenAIKey?: boolean; // Flag to use direct OpenAI key if available
   useDirectGeminiKey?: boolean; // Flag to use direct Gemini key if available
   systemPrompt?: string; // Common system prompt template with placeholders
+  maxFreeLLMCalls?: number; // Maximum number of free LLM calls before requiring user's own API key
 }
 
 export interface Message {
@@ -44,6 +45,7 @@ export interface Message {
   role: 'user' | 'assistant' | string;
   content: string;
   createdAt: Date;
+  showChangeApiKey?: boolean; // Flag to show "Change API Key" button on error messages
 }
 
 export interface ChatState {

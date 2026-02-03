@@ -27,6 +27,7 @@ interface RawConfigJson {
   fallbackModelId?: string;
   useDirectOpenAIKey?: boolean;
   useDirectGeminiKey?: boolean;
+  maxFreeLLMCalls?: number;
   availableModels: Array<{
     id: string;
     name: string;
@@ -109,6 +110,7 @@ export function loadConfig(): Config {
     // Load the new flags, defaulting to true if not present in config.json
     useDirectOpenAIKey: configJson.useDirectOpenAIKey ?? true,
     useDirectGeminiKey: configJson.useDirectGeminiKey ?? true,
+    maxFreeLLMCalls: configJson.maxFreeLLMCalls, // Optional max free LLM calls limit
     apiKeys: defaultConfig.apiKeys || {}
   } as Config;
 }
@@ -159,5 +161,3 @@ export function parseModelId(modelId: string): { provider: string; modelName: st
     modelName: parts[1]
   };
 }
-
-

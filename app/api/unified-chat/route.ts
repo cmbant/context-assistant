@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Parse message from post
-    const { programId, messages, modelId, stream = false } = await request.json();
+    const { programId, messages, modelId, stream = false, userApiKey } = await request.json();
 
     // Get program configuration
     const program = getProgramById(programId);
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
         // Handle streaming request
         try {
           // Try with the primary model first
-          const streamingResponse = await createStreamingChatCompletion(modelId, allMessages);
+          const streamingResponse = await createStreamingChatCompletion(modelId, allMessages, {}, userApiKey);
 
           // For streaming responses, we need to convert the OpenAI stream to a ReadableStream
           const encoder = new TextEncoder();
@@ -165,6 +165,12 @@ export async function POST(request: NextRequest) {
           }
         });
         } catch (primaryError) {
+          // If user provided their own API key, don't use fallback - report the error so they can fix their key
+          if (userApiKey) {
+            console.log('User API key provided, not using fallback model');
+            throw primaryError;
+          }
+
           // If there's a fallback model configured and the primary model failed, try the fallback
           if (fallbackModelId) {
             console.log(`Primary model failed, trying fallback model: ${fallbackModelId}`);
@@ -187,7 +193,7 @@ export async function POST(request: NextRequest) {
             ];
 
             // Try with the fallback model
-            const fallbackStreamingResponse = await createStreamingChatCompletion(fallbackModelId, fallbackMessages);
+            const fallbackStreamingResponse = await createStreamingChatCompletion(fallbackModelId, fallbackMessages, {}, userApiKey);
 
             // Check if the fallback streaming response is valid
             if (!fallbackStreamingResponse) {
@@ -272,7 +278,7 @@ export async function POST(request: NextRequest) {
         // Handle non-streaming request
         try {
           // Try with the primary model first
-          const completion = await createChatCompletion(modelId, allMessages);
+          const completion = await createChatCompletion(modelId, allMessages, {}, userApiKey);
 
           // Log token usage
           if (completion.usage) {
@@ -288,6 +294,12 @@ export async function POST(request: NextRequest) {
             { status: 200, headers: { 'Content-Type': 'application/json' } }
           );
         } catch (primaryError) {
+          // If user provided their own API key, don't use fallback - report the error so they can fix their key
+          if (userApiKey) {
+            console.log('User API key provided, not using fallback model');
+            throw primaryError;
+          }
+
           // If there's a fallback model configured and the primary model failed, try the fallback
           if (fallbackModelId) {
             console.log(`Primary model failed, trying fallback model: ${fallbackModelId}`);
@@ -311,7 +323,7 @@ export async function POST(request: NextRequest) {
               ];
 
               // Try with the fallback model
-              const fallbackCompletion = await createChatCompletion(fallbackModelId, fallbackMessages);
+              const fallbackCompletion = await createChatCompletion(fallbackModelId, fallbackMessages, {}, userApiKey);
 
               // Log token usage for the fallback model
               if (fallbackCompletion.usage) {

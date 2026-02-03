@@ -11,6 +11,12 @@ import remarkMath from 'remark-math';
 // We'll handle syntax highlighting styles in globals.css
 import { Message } from '@/app/utils/types';
 import CopyButton from './copy-button';
+import ApiKeyPrompt from './api-key-prompt';
+import {
+  incrementCallCount,
+  getUserGeminiKey,
+  requiresUserApiKey
+} from '@/app/utils/usage-tracking';
 
 export default function ChatSimple({
   programId,
@@ -28,6 +34,8 @@ export default function ChatSimple({
   const [isLoading, setIsLoading] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const [maxTextareaHeight, setMaxTextareaHeight] = useState(200); // Default max height
+  const [showApiKeyPrompt, setShowApiKeyPrompt] = useState(false);
+  const [userApiKey, setUserApiKey] = useState<string | null>(null);
   const messageId = useRef(0);
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -89,6 +97,14 @@ export default function ChatSimple({
     };
   }, []);
 
+  // Load user API key from localStorage on mount
+  useEffect(() => {
+    const storedKey = getUserGeminiKey();
+    if (storedKey) {
+      setUserApiKey(storedKey);
+    }
+  }, []);
+
   // Auto-resize the textarea when the component mounts or when prompt changes
   useEffect(() => {
     if (textareaRef.current) {
@@ -108,6 +124,21 @@ export default function ChatSimple({
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+
+    // Get model options to check if streaming is enabled and provider type
+    const configModule = await import('@/app/utils/config');
+    const configData = configModule.loadConfig();
+    const modelIdToCheck = selectedModelId || configData.defaultModelId;
+    const { provider } = configModule.parseModelId(modelIdToCheck);
+
+    // Check if this is a non-OpenRouter call that counts against the free limit
+    const isCountedCall = provider !== 'openrouter' && provider !== 'deepseek';
+
+    // Check if user needs to provide their own API key
+    if (isCountedCall && requiresUserApiKey(configData.maxFreeLLMCalls)) {
+      setShowApiKeyPrompt(true);
+      return;
+    }
 
     // Add busy indicator
     setIsLoading(true);
@@ -148,9 +179,6 @@ export default function ChatSimple({
 
       console.log(`Using API endpoint: ${apiEndpoint} with model ID: ${selectedModelId || 'default'}`);
 
-      // Get model options to check if streaming is enabled
-      const configModule = await import('@/app/utils/config');
-      const configData = configModule.loadConfig();
       const modelConfig = configData.availableModels.find(model => model.id === selectedModelId);
       const useStreaming = modelConfig?.options?.stream === true;
 
@@ -163,6 +191,9 @@ export default function ChatSimple({
         setIsStreaming(true);
       }
 
+      // Get user's API key if available
+      const currentUserApiKey = userApiKey || getUserGeminiKey();
+
       const response = await fetch(apiEndpoint, {
         method: 'POST',
         headers: {
@@ -173,9 +204,15 @@ export default function ChatSimple({
           messages: apiMessages,
           modelId: selectedModelId, // Pass the selected model ID
           stream: useStreaming, // Pass streaming flag
+          userApiKey: currentUserApiKey, // Pass user's API key if available
         }),
         signal, // Pass the abort signal
       });
+
+      // Increment call count for non-OpenRouter calls (only after successful request start)
+      if (isCountedCall && !currentUserApiKey) {
+        incrementCallCount();
+      }
 
       // Check if the response is ok
       if (!response.ok) {
@@ -317,13 +354,20 @@ export default function ChatSimple({
       // Display error message to the user
       messageId.current++;
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+      // If user has their own API key and there's an error, offer to change the key
+      const hasUserKey = userApiKey !== null;
+
       // Create a timestamp for the error message
       const errorTimestamp = new Date();
       const errorAssistantMessage = {
         id: messageId.current.toString(),
         role: "assistant",
-        content: `I'm sorry, there was an error processing your request: ${errorMessage}. Please try again later.`,
+        content: hasUserKey
+          ? `I'm sorry, there was an error processing your request: ${errorMessage}. This may be an issue with your API key - click "Change API Key" below to update it.`
+          : `I'm sorry, there was an error processing your request: ${errorMessage}. Please try again later.`,
         createdAt: errorTimestamp,
+        showChangeApiKey: hasUserKey, // Flag to show the change API key button
       };
 
       // Update current messages and store in the map
@@ -394,8 +438,19 @@ export default function ChatSimple({
 
   // No longer need handleModelChange as the model selector is moved to the container
 
+  // Handle API key submission from the prompt modal
+  function handleApiKeySubmit(key: string) {
+    setUserApiKey(key);
+    setShowApiKeyPrompt(false);
+  }
+
   return (
     <div className="flex flex-col bg-white dark:bg-gray-800">
+      <ApiKeyPrompt
+        isOpen={showApiKeyPrompt}
+        onClose={() => setShowApiKeyPrompt(false)}
+        onKeySubmit={handleApiKeySubmit}
+      />
       <div className="p-2">
         <ChatMessage
           message={greetingMessageRef.current}
@@ -404,6 +459,7 @@ export default function ChatSimple({
           <ChatMessage
             key={m.id}
             message={m}
+            onChangeApiKey={m.showChangeApiKey ? () => setShowApiKeyPrompt(true) : undefined}
           />
         )}
       </div>
@@ -453,7 +509,7 @@ export default function ChatSimple({
   );
 }
 
-function ChatMessage({ message }: { message: Message }) {
+function ChatMessage({ message, onChangeApiKey }: { message: Message; onChangeApiKey?: () => void }) {
   function displayRole(roleName: string) {
     switch (roleName) {
       case "user":
@@ -534,6 +590,14 @@ function ChatMessage({ message }: { message: Message }) {
           >
             {processedContent}
         </Markdown>
+        {onChangeApiKey && (
+          <button
+            onClick={onChangeApiKey}
+            className="mt-2 px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+          >
+            Change API Key
+          </button>
+        )}
       </div>
     </div>
   );

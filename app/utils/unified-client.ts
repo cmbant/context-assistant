@@ -40,9 +40,10 @@ const PROVIDER_CONFIGS: Record<string, ProviderConfig> = {
 /**
  * Create an OpenAI client configured for the specified model ID
  * @param modelId The model ID in the format "provider/model-name"
+ * @param userApiKey Optional user-provided API key (for Gemini)
  * @returns An OpenAI client configured for the specified provider
  */
-export function createClient(modelId?: string) {
+export function createClient(modelId?: string, userApiKey?: string) {
   const config = loadConfig();
 
   // Default to the configuration's default model if no model ID is provided
@@ -73,7 +74,15 @@ export function createClient(modelId?: string) {
 
   const providerConfig = PROVIDER_CONFIGS[targetProviderKey];
   const apiKeyEnvVar = providerConfig.apiKeyEnvVar;
-  const apiKey = process.env[apiKeyEnvVar];
+
+  // Use user-provided API key for Gemini if available, otherwise use environment variable
+  let apiKey: string | undefined;
+  if (userApiKey && targetProviderKey === 'gemini') {
+    apiKey = userApiKey;
+    console.log('Using user-provided Gemini API key');
+  } else {
+    apiKey = process.env[apiKeyEnvVar];
+  }
 
   // Determine actual provider and model name for the API call
   const actualProvider = targetProviderKey;
@@ -140,15 +149,17 @@ export function getModelOptions(modelId?: string) {
  * @param modelId The model ID in the format "provider/model-name"
  * @param messages The chat messages
  * @param options Additional options for the completion
+ * @param userApiKey Optional user-provided API key (for Gemini)
  * @returns The completion response
  */
 export async function createChatCompletion(
   modelId: string | undefined,
   messages: Array<{ role: string; content: string }>,
-  options: Record<string, any> = {}
+  options: Record<string, any> = {},
+  userApiKey?: string
 ) {
   // Create the client for the specified model
-  const { client, modelName } = createClient(modelId);
+  const { client, modelName } = createClient(modelId, userApiKey);
 
   // Get the model options from the configuration
   const modelOptions = getModelOptions(modelId);
@@ -170,15 +181,17 @@ export async function createChatCompletion(
  * @param modelId The model ID in the format "provider/model-name"
  * @param messages The chat messages
  * @param options Additional options for the completion
+ * @param userApiKey Optional user-provided API key (for Gemini)
  * @returns A ReadableStream of the completion response
  */
 export async function createStreamingChatCompletion(
   modelId: string | undefined,
   messages: Array<{ role: string; content: string }>,
-  options: Record<string, any> = {}
+  options: Record<string, any> = {},
+  userApiKey?: string
 ) {
   // Create the client for the specified model
-  const { client, modelName, provider } = createClient(modelId);
+  const { client, modelName, provider } = createClient(modelId, userApiKey);
 
   // Get the model options from the configuration
   const modelOptions = getModelOptions(modelId);
