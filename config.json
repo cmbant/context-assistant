@@ -35,7 +35,7 @@
   "fallbackModelId": "openai/gpt-5-mini",
   "useDirectOpenAIKey": true,
   "useDirectGeminiKey": true,
-  "maxFreeLLMCalls": 3,
+  "maxFreeLLMCalls": 5,
   "availableModels": [
     {
       "id": "gemini/gemini-flash-latest",
@@ -57,8 +57,8 @@
       }
     },
     {
-      "id": "deepseek/deepseek-chat-v3-0324",
-      "name": "Deepseek Chat V3",
+      "id": "deepseek/deepseek-v3.2",
+      "name": "Deepseek 3.2",
       "description": "Deepseek via OpenRouter",
       "options": {
         "temperature": 0.7,
